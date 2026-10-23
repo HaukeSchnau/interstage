@@ -1,4 +1,7 @@
 packages:
   - examples
 allowBuilds:
+  # Removes macOS's quarantine attribute from dawn.node; nothing on Linux.
   webgpu: true
+  # Fetches the runtime for `alchemy dev`, which deploys don't use.
+  workerd: false

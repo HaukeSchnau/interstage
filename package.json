@@ -4,6 +4,7 @@
   "description": "Import WGSL into TypeScript as typed TypeGPU modules. A TypeScript 7.1 content mapper and a Vite plugin.",
   "license": "MIT",
   "author": "Hauke Schnau",
+  "homepage": "https://interstage.schnau.dev",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/HaukeSchnau/interstage.git"
@@ -50,9 +51,10 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit --runExternalCode",
+    "typecheck": "pnpm run build && tsc --noEmit --runExternalCode",
     "test": "pnpm run build && node --import ./src/register.ts --test 'test/*.test.ts'",
-    "prepare": "tsc -p tsconfig.build.json"
+    "prepare": "tsc -p tsconfig.build.json",
+    "prepack": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
     "ts-content-mapper": "^0.1.0"

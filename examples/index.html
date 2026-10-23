@@ -17,6 +17,7 @@
           check every place where host code meets shader code.
         </p>
         <p class="links">
+          <a href="https://www.npmjs.com/package/interstage">interstage on npm</a>
           <a href="https://github.com/HaukeSchnau/interstage">Source on GitHub</a>
           <a href="#setup">Set it up</a>
         </p>
@@ -111,12 +112,12 @@ src/slime/main.ts(40,66): error TS2345: Argument of type '{ decay: number; senso
         <h2 id="setup-title">Set it up</h2>
         <ol>
           <li>
-            <p>Install interstage next to TypeScript 7.1 and TypeGPU. It isn't on npm yet; installing from GitHub builds it.</p>
-            <pre class="code"><code>npm install --save-dev github:HaukeSchnau/interstage typescript@beta
-npm install typegpu</code></pre>
+            <p>Install interstage next to TypeScript 7.1 and TypeGPU.</p>
+            <pre class="code"><code>pnpm add -D interstage typescript@beta
+pnpm add typegpu</code></pre>
           </li>
           <li>
-            <p>Register the content mapper in <code>tsconfig.json</code>. <code>validate</code> is optional and needs the <code>webgpu</code> package.</p>
+            <p>Register the content mapper in <code>tsconfig.json</code>. <code>validate</code> is optional and needs the <code>webgpu</code> package (<code>pnpm add -D webgpu</code>).</p>
             <pre class="code"><code>{
   "compilerOptions": { "skipLibCheck": true },
   "contentMappers": [

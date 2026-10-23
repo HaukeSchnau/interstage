@@ -56,11 +56,11 @@ In the editor, the TypeScript language server goes to the WGSL declaration of an
 
 ## Set it up
 
-1. Install interstage next to TypeScript 7.1 and TypeGPU. interstage isn't on npm yet; installing from GitHub builds it.
+1. Install interstage next to TypeScript 7.1 and TypeGPU:
 
    ```sh
-   npm install --save-dev github:HaukeSchnau/interstage typescript@beta
-   npm install typegpu
+   pnpm add -D interstage typescript@beta
+   pnpm add typegpu
    ```
 
 2. Register the content mapper in `tsconfig.json`. TypeGPU's declarations need `skipLibCheck` under TypeScript 7.
@@ -72,7 +72,7 @@ In the editor, the TypeScript language server goes to the WGSL declaration of an
    }
    ```
 
-   `validate` is optional. It needs the [`webgpu`](https://www.npmjs.com/package/webgpu) package, which runs Dawn in Node: Metal on macOS, D3D on Windows and Vulkan on Linux. Without a GPU on Linux, point `VK_ICD_FILENAMES` at Mesa's lavapipe.
+   `validate` is optional. It needs the [`webgpu`](https://www.npmjs.com/package/webgpu) package (`pnpm add -D webgpu`), which runs Dawn in Node: Metal on macOS, D3D on Windows and Vulkan on Linux. Without a GPU on Linux, point `VK_ICD_FILENAMES` at Mesa's lavapipe.
 
 3. Load `.wgsl` files as modules in Vite:
 
@@ -110,7 +110,7 @@ Function bodies stay as written. TypeGPU links them: it includes what each entry
 
 ## Examples
 
-[`examples/`](examples) holds four WebGPU demos: a slime mold simulation, ink in water, a raymarched sculpture and a topographic atlas whose fragment shader is TypeScript calling WGSL. Each has a drawer that shows its shader next to the declarations `tsc` emits for it.
+Try them at [interstage.schnau.dev](https://interstage.schnau.dev): a slime mold simulation, ink in water, a raymarched sculpture and a topographic atlas whose fragment shader is TypeScript calling WGSL. Each has a drawer that shows its shader next to the declarations `tsc` emits for it. They live in [`examples/`](examples):
 
 ```sh
 pnpm install
@@ -136,7 +136,9 @@ pnpm --dir examples typecheck
 pnpm --dir examples build && pnpm --dir examples check
 ```
 
-The tests compile shaders with Tint and run them on Dawn, so they need a WebGPU adapter, like the `validate` option. `examples/check` loads every demo in Chromium (set `CHROME` to its path) and fails on WebGPU errors or blank frames.
+The tests compile shaders with Tint and run them on Dawn, so they need a WebGPU adapter, like the `validate` option. `examples/check` loads every demo in Chromium (set `CHROME` to its path) and fails on WebGPU errors or blank frames. `nix develop` gives a shell with Node, pnpm, Chromium and Mesa's software Vulkan driver, in which all of it runs without a GPU.
+
+[Calder](https://calder.schnau.dev) runs these checks on every push and pull request (`.calder/ci.ts`). A pull request gets a preview of the examples, and `main` deploys them to interstage.schnau.dev. A commit that raises the version in `package.json` stages that version on npm, where a maintainer approves it with 2FA (`npm stage approve <id>`).
 
 ## License
 

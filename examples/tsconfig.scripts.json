@@ -1,5 +1,15 @@
 {
   "extends": "./tsconfig.json",
-  "compilerOptions": { "types": ["node", "vite/client"] },
-  "include": ["scripts", "vite.config.ts", "src/shell.ts"]
+  "compilerOptions": {
+    "types": [
+      "node",
+      "vite/client"
+    ]
+  },
+  "include": [
+    "scripts",
+    "vite.config.ts",
+    "alchemy.run.ts",
+    "src/shell.ts"
+  ]
 }
