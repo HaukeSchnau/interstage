@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>interstage: WGSL modules for TypeScript</title>
+    <meta name="description" content="Import WGSL shaders into TypeScript as typed TypeGPU modules, checked by tsc through a TypeScript 7.1 content mapper." />
+  </head>
+  <body class="home">
+    <header class="hero">
+      <canvas id="hero" aria-hidden="true"></canvas>
+      <div class="hero-text">
+        <h1 class="wordmark">interstage</h1>
+        <p class="lede">
+          Import <span class="wgsl-mark">WGSL</span> shaders into <span class="ts-mark">TypeScript</span> as typed TypeGPU
+          modules. A TypeScript 7.1 content mapper reads your <code>.wgsl</code> files, so <code>tsc</code> and your editor
+          check every place where host code meets shader code.
+        </p>
+        <p class="links">
+          <a href="https://github.com/HaukeSchnau/interstage">Source on GitHub</a>
+          <a href="#setup">Set it up</a>
+        </p>
+      </div>
+    </header>
+
+    <main>
+      <section class="pair" aria-labelledby="pair-title">
+        <div class="pair-text">
+          <h2 id="pair-title">One file, two languages</h2>
+          <p>
+            The shader stays plain WGSL. interstage turns each declaration into its TypeGPU counterpart: structs into schemas,
+            each <code>@group</code> into a bind group layout, functions into typed functions and entry points into pipeline
+            stages.
+          </p>
+          <p>
+            Because <code>tsc</code> reads the shader itself, there is nothing to generate and nothing to keep in sync. Rename a
+            field in the shader and the TypeScript that writes it stops compiling.
+          </p>
+        </div>
+        <figure class="code-pair">
+          <div>
+            <figcaption><span class="wgsl-mark">slime.wgsl</span>, as written</figcaption>
+            <pre class="code" id="pair-wgsl"></pre>
+          </div>
+          <div>
+            <figcaption><span class="ts-mark">slime.wgsl</span>, as <code>tsc</code> sees it</figcaption>
+            <pre class="code" id="pair-ts"></pre>
+          </div>
+        </figure>
+      </section>
+
+      <section class="demos" aria-labelledby="demos-title">
+        <h2 id="demos-title">Examples</h2>
+        <p class="section-note">Each one runs in your browser on WebGPU. Open the contract drawer on any of them to see the shader next to the declarations <code>tsc</code> emits for it.</p>
+        <ul class="demo-list">
+          <li class="demo-row">
+            <a href="slime/"><img src="posters/slime.webp" alt="Three colors of slime mold trails branching out from a central bloom" width="960" height="540" loading="lazy" /></a>
+            <div>
+              <h3><a href="slime/">Slime</a></h3>
+              <p>Hundreds of thousands of agents lay and follow trails in three competing species.</p>
+              <p class="shows">Five entry points in one WGSL module: scatter, clear, step, diffuse and a full-screen draw. The sliders write the <code>Params</code> struct field by field.</p>
+            </div>
+          </li>
+          <li class="demo-row">
+            <a href="ink/"><img src="posters/ink.webp" alt="Bright plumes of ink swirling in dark water" width="960" height="540" loading="lazy" /></a>
+            <div>
+              <h3><a href="ink/">Ink</a></h3>
+              <p>Stable fluids with vorticity confinement. Drag through the water to stir it.</p>
+              <p class="shows">Nine passes share one bind group layout of eight storage buffers, and TypeScript checks the element type of every buffer bound to it.</p>
+            </div>
+          </li>
+          <li class="demo-row">
+            <a href="sculpture/"><img src="posters/sculpture.webp" alt="An iridescent sphere carved into a lattice, with three drops melting into it" width="960" height="540" loading="lazy" /></a>
+            <div>
+              <h3><a href="sculpture/">Sculpture</a></h3>
+              <p>A gyroid lattice and three orbiting drops, raymarched with soft shadows.</p>
+              <p class="shows">A single fragment shader driven by one uniform struct, <code>Scene</code>, which TypeScript fills in by name.</p>
+            </div>
+          </li>
+          <li class="demo-row">
+            <a href="atlas/"><img src="posters/atlas.webp" alt="A topographic map of an island with contour lines and snowy highlands" width="960" height="540" loading="lazy" /></a>
+            <div>
+              <h3><a href="atlas/">Atlas</a></h3>
+              <p>An endless topographic map. Drag to travel, scroll to zoom.</p>
+              <p class="shows">The fragment shader is TypeScript and calls <code>elevation()</code> from <code>atlas.wgsl</code>, so a call with the wrong vector type fails to compile.</p>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="diagnostics" aria-labelledby="diagnostics-title">
+        <h2 id="diagnostics-title">What tsc tells you</h2>
+        <p class="section-note">Real output from building these examples.</p>
+        <figure>
+          <figcaption>With the <code>validate</code> option, Tint, the WGSL compiler inside Chrome, checks every shader during the type check. One of the first drafts of the slime mold used a reserved word:</figcaption>
+          <pre class="terminal">$ tsc --noEmit --runExternalCode
+src/slime/slime.wgsl(116,9): error wgsl100: 'target' is a reserved keyword</pre>
+        </figure>
+        <figure>
+          <figcaption>Changing <code>speed: f32</code> to <code>speed: vec2f</code> in <code>slime.wgsl</code> breaks the TypeScript that writes it:</figcaption>
+          <pre class="terminal">$ tsc --noEmit --runExternalCode
+src/slime/main.ts(40,66): error TS2345: Argument of type '{ decay: number; sensorAngle: number;
+  sensorDistance: number; speciesCount: number; speed: number; turnSpeed: number; }' is not
+  assignable to parameter of type 'Behaviour'.
+  Types of property 'speed' are incompatible.
+    Type 'number' is not assignable to type 'v2f'.</pre>
+        </figure>
+      </section>
+
+      <section class="setup" id="setup" aria-labelledby="setup-title">
+        <h2 id="setup-title">Set it up</h2>
+        <ol>
+          <li>
+            <p>Install interstage next to TypeScript 7.1 and TypeGPU. It isn't on npm yet; installing from GitHub builds it.</p>
+            <pre class="code"><code>npm install --save-dev github:HaukeSchnau/interstage typescript@beta
+npm install typegpu</code></pre>
+          </li>
+          <li>
+            <p>Register the content mapper in <code>tsconfig.json</code>. <code>validate</code> is optional and needs the <code>webgpu</code> package.</p>
+            <pre class="code"><code>{
+  "compilerOptions": { "skipLibCheck": true },
+  "contentMappers": [
+    { "package": "interstage", "extensions": [".wgsl"], "options": { "validate": true } }
+  ]
+}</code></pre>
+          </li>
+          <li>
+            <p>Let Vite load <code>.wgsl</code> files as modules.</p>
+            <pre class="code"><code>import interstage from 'interstage/vite'
+
+export default defineConfig({ plugins: [interstage()] })</code></pre>
+          </li>
+          <li>
+            <p>Type-check with permission to run the mapper. In VS Code, the TypeScript 7 extension does the same in trusted workspaces.</p>
+            <pre class="code"><code>tsc --noEmit --runExternalCode</code></pre>
+          </li>
+        </ol>
+      </section>
+    </main>
+
+    <footer>
+      <p>interstage is open source under the MIT license. <a href="https://github.com/HaukeSchnau/interstage">Read the source</a>.</p>
+    </footer>
+    <script type="module" src="./src/index.ts"></script>
+  </body>
+</html>

@@ -71,6 +71,8 @@ export async function demo<const Controls extends readonly Control[]>(options: D
   canvas.id = 'stage'
   document.body.append(canvas)
   document.body.append(header(options))
+  // The contract is worth reading without WebGPU too, so it comes before the GPU.
+  document.body.append(drawer(options.contract))
 
   let root: TgpuRoot
   try {
@@ -96,7 +98,6 @@ export async function demo<const Controls extends readonly Control[]>(options: D
     [Key in Controls[number]['key']]: number
   }
   document.body.append(panel(options, values))
-  document.body.append(drawer(options.contract))
 
   const resizeListeners: Array<(width: number, height: number) => void> = []
   const resize = () => {
@@ -324,7 +325,7 @@ async function requestAdapter(): Promise<GPUAdapter> {
 function fallback(error: unknown) {
   const element = document.createElement('div')
   element.className = 'fallback'
-  element.innerHTML = `<div><h2>This demo needs WebGPU</h2><p></p><p>It runs in current Chrome and Edge, and in Safari 26 on macOS and iOS.</p><p><a href="../">Back to the examples</a></p></div>`
+  element.innerHTML = `<div><h2>This demo needs WebGPU</h2><p></p><p>It runs in current Chrome and Edge, and in Safari 26 on macOS and iOS. The contract, top right, works everywhere.</p><p><a href="../">Back to the examples</a></p></div>`
   element.querySelector('p')!.textContent = error instanceof Error ? error.message : String(error)
   document.body.append(element)
 }

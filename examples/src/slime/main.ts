@@ -1,9 +1,9 @@
 import { d } from 'typegpu'
 import { demo, quality } from '../shell.ts'
-import * as slime from './slime.wgsl'
+import { slimeSimulation } from './simulation.ts'
 import shader from './slime.wgsl?raw'
 import declarations from '../../.contract/slime/slime.d.wgsl.ts?raw'
-import host from './main.ts?raw'
+import host from './simulation.ts?raw'
 
 const app = await demo({
   title: 'Slime',
@@ -23,90 +23,32 @@ const app = await demo({
   contract: {
     shaders: [{ shaderName: 'slime.wgsl', shader, declarations }],
     host,
-    hostName: 'main.ts',
+    hostName: 'simulation.ts',
   },
 })
 
-const { root, values, pointer } = app
-const params = root.createBuffer(slime.Params).$usage('uniform')
-const shared = root.createBindGroup(slime.layout0, { params })
+const { values, pointer, canvas } = app
+const simulation = slimeSimulation(app.root, app.format)
+const size = () => ({
+  scale: quality === 'low' ? 0.25 : Math.min(1, 1600 / canvas.width) * (canvas.width > 1200 ? 0.75 : 1),
+  density: quality === 'low' ? 0.05 : 0.45,
+})
 
-const pipelines = {
-  scatter: root.createComputePipeline({ compute: slime.scatter }),
-  clear: root.createComputePipeline({ compute: slime.clear }),
-  step: root.createComputePipeline({ compute: slime.step }),
-  diffuse: root.createComputePipeline({ compute: slime.diffuse }),
-  render: root.createRenderPipeline({ vertex: slime.fullscreen, fragment: slime.render, targets: { format: app.format } }),
-}
-
-let world = createWorld(app.canvas.width, app.canvas.height)
 let species = values.speciesCount
-let time = 0
-
-function createWorld(canvasWidth: number, canvasHeight: number) {
-  const scale = quality === 'low' ? 0.25 : Math.min(1, 1600 / canvasWidth) * (canvasWidth > 1200 ? 0.75 : 1)
-  const size = d.vec2f(Math.max(64, Math.round(canvasWidth * scale)), Math.max(64, Math.round(canvasHeight * scale)))
-  const agentCount = Math.round(size.x * size.y * (quality === 'low' ? 0.05 : 0.45))
-  const agents = root.createBuffer(d.arrayOf(slime.Agent, agentCount)).$usage('storage')
-  const trails = [0, 1].map(() => root.createBuffer(d.arrayOf(d.vec4f, size.x * size.y)).$usage('storage'))
-  const groups = [0, 1].map((i) => root.createBindGroup(slime.layout1, { agents, trail: trails[i]!, trailNext: trails[1 - i]! }))
-  return { canvasWidth, canvasHeight, size, agentCount, agents, trails, groups, current: 0 }
-}
-
-function writeParams(dt: number) {
-  params.write({
-    size: world.size,
-    canvas: d.vec2f(app.canvas.width, app.canvas.height),
-    pointer: d.vec2f(pointer.x * world.size.x, pointer.y * world.size.y),
-    time,
-    dt,
-    speed: values.speed,
-    sensorAngle: values.sensorAngle,
-    sensorDistance: values.sensorDistance,
-    turnSpeed: values.turnSpeed,
-    deposit: 1.6,
-    decay: values.decay,
-    pointerForce: pointer.down ? 6 : 0,
-    agentCount: world.agentCount,
-    speciesCount: values.speciesCount,
-  })
-}
-
-const agentGroups = () => Math.ceil(world.agentCount / slime.WORKGROUP)
-const tiles = () => [Math.ceil(world.size.x / slime.TILE), Math.ceil(world.size.y / slime.TILE)] as const
-
 function reset() {
-  writeParams(0)
-  pipelines.scatter.with(shared).with(world.groups[0]!).dispatchWorkgroups(agentGroups())
-  pipelines.clear.with(shared).with(world.groups[0]!).dispatchWorkgroups(...tiles())
+  species = values.speciesCount
+  simulation.reset(d.vec2f(canvas.width, canvas.height), size(), values)
 }
 
 let resizeTimer: ReturnType<typeof setTimeout> | undefined
-app.onResize((width, height) => {
+app.onResize(() => {
   clearTimeout(resizeTimer)
-  resizeTimer = setTimeout(() => {
-    if (width === world.canvasWidth && height === world.canvasHeight) return
-    for (const buffer of [world.agents, ...world.trails]) buffer.destroy()
-    world = createWorld(width, height)
-    reset()
-  }, 200)
+  resizeTimer = setTimeout(reset, 200)
 })
-
 reset()
+
 app.run(({ dt }) => {
-  time += dt
-  if (values.speciesCount !== species) {
-    species = values.speciesCount
-    reset()
-  }
-  writeParams(dt)
-  const group = world.groups[world.current]!
-  pipelines.step.with(shared).with(group).dispatchWorkgroups(agentGroups())
-  pipelines.diffuse.with(shared).with(group).dispatchWorkgroups(...tiles())
-  world.current = 1 - world.current
-  pipelines.render
-    .with(shared)
-    .with(world.groups[world.current]!)
-    .withColorAttachment({ view: app.target(), loadOp: 'clear', storeOp: 'store', clearValue: [0, 0, 0, 1] })
-    .draw(3)
+  if (values.speciesCount !== species) reset()
+  simulation.step(dt, values, { x: pointer.x, y: pointer.y, pull: pointer.down })
+  simulation.draw(app.target())
 })

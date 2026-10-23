@@ -3,7 +3,7 @@ import interstage from 'interstage/vite'
 import typegpu from 'unplugin-typegpu/vite'
 import { defineConfig } from 'vite'
 
-const pages = ['slime/index']
+const pages = ['index', 'slime/index', 'ink/index', 'sculpture/index', 'atlas/index']
 
 export default defineConfig({
   base: './',

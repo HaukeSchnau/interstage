@@ -52,7 +52,7 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit --runExternalCode",
     "test": "pnpm run build && node --import ./src/register.ts --test 'test/*.test.ts'",
-    "prepare": "pnpm run build"
+    "prepare": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
     "ts-content-mapper": "^0.1.0"
