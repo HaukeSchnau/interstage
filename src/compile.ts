@@ -2,7 +2,7 @@ import { MappedCodeBuilder, SpanMapFeature, type PositionEncoding, type SpanMapp
 import { convert, EvalError, evaluate, isAbstractScalar, toJs, type ConstEnv, type Value } from './evaluate.ts'
 import type { Span, Token } from './lexer.ts'
 import { parse, type Attribute, type ConstDecl, type Decl, type Expr, type FnDecl, type Ident, type StructDecl, type TemplateArg, type TypeExpr, type VarDecl } from './parser.ts'
-import { matrixShape, schemaOf, scopeOf, toTy, vectorShape, type TypeScope } from './types.ts'
+import { matrixShape, schemaOf, scopeOf, toTy, vectorShape } from './types.ts'
 
 export interface Diagnostic extends Span {
   message: string
@@ -131,8 +131,13 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
   // Constants, evaluated on demand so that their order in the file doesn't matter.
   const constValues = new Map<string, Value | EvalError>()
   const evaluating = new Set<string>()
+  const scope = scopeOf(module.decls, (arg) => {
+    const count = integer(arg, 'An array size')
+    if (count === undefined) throw new EvalError('Invalid array size')
+    return count
+  })
   const env: ConstEnv = {
-    scope: undefined as unknown as TypeScope,
+    scope,
     lookup(name) {
       const cached = constValues.get(name)
       if (cached instanceof EvalError) throw cached
@@ -143,7 +148,7 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
       evaluating.add(name)
       try {
         const raw = evaluate(decl.init, env)
-        const value = decl.type ? convert(raw, toTy(decl.type, env.scope)) : raw
+        const value = decl.type ? convert(raw, toTy(decl.type, scope)) : raw
         constValues.set(name, value)
         return value
       } catch (error) {
@@ -167,11 +172,6 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     }
     return undefined
   }
-  env.scope = scopeOf(module.decls, (arg) => {
-    const count = integer(arg, 'An array size')
-    if (count === undefined) throw new EvalError('Invalid array size')
-    return count
-  })
 
   const b = new MappedCodeBuilder(source, { positionEncoding: options.positionEncoding ?? 'utf-16' })
   const name = (ident: Ident) => b.appendVerbatim(ident.start, ident.end)
@@ -301,7 +301,7 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
       }
     }
     // The outermost decorator comes first in TypeGPU, so `@location` must wrap `@interpolate`.
-    wrappers.sort(([a], [b_]) => Number(b_.startsWith('d.location')) - Number(a.startsWith('d.location')))
+    wrappers.sort(([x], [y]) => Number(y.startsWith('d.location')) - Number(x.startsWith('d.location')))
     for (const [open] of wrappers) b.append(open)
     schema(type)
     for (const [, close] of wrappers.reverse()) b.append(close)
@@ -430,7 +430,7 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     if (decl.init) {
       if (space === 'workgroup') report(decl.init, DiagnosticCode.Invalid, 'Workgroup variables cannot have an initializer')
       try {
-        b.append(`, ${toJs(convert(constant(decl.init), toTy(decl.type, env.scope)))}`)
+        b.append(`, ${toJs(convert(constant(decl.init), toTy(decl.type, scope)))}`)
       } catch (error) {
         report(decl.init, DiagnosticCode.NotConstant, `The initializer must be a constant: ${(error as Error).message}`)
       }
@@ -440,7 +440,7 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
   }
 
   const layoutNames = new Map<string, string>()
-  for (const [group, entries] of [...groups].sort(([a], [b_]) => a - b_)) {
+  for (const [group, entries] of [...groups].sort(([x], [y]) => x - y)) {
     const layoutName = `layout${group}`
     if (decls.has(layoutName)) {
       report(decls.get(layoutName)!.name, DiagnosticCode.Name, `'${layoutName}' is the name of the @group(${group}) layout; rename this declaration`)
