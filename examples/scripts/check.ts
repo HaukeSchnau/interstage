@@ -1,6 +1,6 @@
 // Loads every example in Chromium and checks that it draws frames without WebGPU errors.
-// Run after `pnpm run build`. CHROME names the browser; on Linux without a GPU, Chromium's
-// SwiftShader renders WebGPU.
+// Run after `pnpm run build`, or set ORIGIN to check a deployment. CHROME names the browser; on
+// Linux without a GPU, Chromium's SwiftShader renders WebGPU.
 import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
 import { extname, join } from 'node:path'
@@ -17,8 +17,8 @@ const server = createServer(async (request, response) => {
   if (body) response.writeHead(200, { 'content-type': types[extname(file)] ?? 'application/octet-stream' }).end(body)
   else response.writeHead(404).end()
 })
-await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
-const origin = `http://127.0.0.1:${(server.address() as { port: number }).port}`
+if (!process.env.ORIGIN) await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
+const origin = process.env.ORIGIN ?? `http://127.0.0.1:${(server.address() as { port: number }).port}`
 
 const browser = await chromium.launch({
   executablePath: process.env.CHROME,
@@ -65,5 +65,5 @@ for (const demo of demos) {
 }
 
 await browser.close()
-server.close()
+if (server.listening) server.close()
 process.exitCode = failures > 0 ? 1 : 0
