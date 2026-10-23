@@ -228,12 +228,21 @@ function parseTemplate(tokens: Token[]): TypeExpr {
     if (tokens[i]?.text === '<') {
       i++
       while (tokens[i] && tokens[i]!.text !== '>') {
-        if (tokens[i]!.kind === 'ident') {
+        const start = i
+        let depth = 0
+        while (tokens[i] && !(depth === 0 && (tokens[i]!.text === ',' || tokens[i]!.text === '>'))) {
+          if (tokens[i]!.text === '<' || tokens[i]!.text === '(') depth++
+          if (tokens[i]!.text === '>' || tokens[i]!.text === ')') depth--
+          i++
+        }
+        const range = tokens.slice(start, i)
+        const isType = range[0]?.kind === 'ident' && (range.length === 1 || (range[1]!.text === '<' && range.at(-1)!.text === '>'))
+        if (isType) {
+          const end = i
+          i = start
           args.push(type())
-        } else {
-          const start = i
-          while (tokens[i] && tokens[i]!.text !== ',' && tokens[i]!.text !== '>') i++
-          const range = tokens.slice(start, i)
+          i = end
+        } else if (range.length > 0) {
           args.push({ kind: 'expr', tokens: range, start: range[0]!.start, end: range.at(-1)!.end })
         }
         if (tokens[i]?.text === ',') i++

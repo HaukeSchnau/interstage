@@ -15,6 +15,9 @@ export const DiagnosticCode = {
   Invalid: 3,
   NotConstant: 4,
   Name: 5,
+  Option: 6,
+  /** An error from Tint, Chrome's WGSL compiler. */
+  Shader: 100,
 } as const
 
 export type DiagnosticCode = (typeof DiagnosticCode)[keyof typeof DiagnosticCode]
@@ -98,6 +101,9 @@ const RESERVED = new Set(
     ' ',
   ),
 )
+
+/** Members of the structs that builtins such as `frexp` and `atomicCompareExchangeWeak` return. */
+const BUILTIN_RESULT_MEMBERS = new Set(['fract', 'exp', 'whole', 'old_value', 'exchanged'])
 
 const STAGES = ['compute', 'vertex', 'fragment'] as const
 type Stage = (typeof STAGES)[number]
@@ -493,19 +499,39 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     b.append('null')
   }
 
+  // A member access in a function body belongs to a struct when no other struct in the module has
+  // a member of that name and the name can't be a swizzle or a field of a builtin's result.
+  const memberOwners = new Map<string, string>()
+  const ambiguous = new Set<string>()
+  for (const decl of module.decls) {
+    if (decl.kind !== 'struct') continue
+    for (const member of decl.members) {
+      const memberName = member.name.name
+      if (/^[xyzw]{1,4}$|^[rgba]{1,4}$/.test(memberName) || BUILTIN_RESULT_MEMBERS.has(memberName)) continue
+      if (memberOwners.has(memberName) && memberOwners.get(memberName) !== decl.name.name) ambiguous.add(memberName)
+      memberOwners.set(memberName, decl.name.name)
+    }
+  }
+  for (const memberName of ambiguous) memberOwners.delete(memberName)
+  const memberNavigation: Array<Reference & { struct: string }> = []
+
   // Functions. `$uses` comes after every declaration, so that the order of functions in the
   // file doesn't matter.
   const wiring: Array<{ fn: string; refs: Reference[] }> = []
   for (const decl of module.decls) {
     if (decl.kind !== 'fn' || decls.get(decl.name.name) !== decl) continue
     const stage = STAGES.find((candidate) => decl.attrs.some((attr) => attr.name.name === candidate))
-    const { refs, locals } = scanBody(decl, decls)
+    const { refs, locals, members } = scanBody(decl, decls)
     for (const local of locals) {
       if (inlined.has(local.name) && refs.some((ref) => ref.name === local.name)) {
         report(local, DiagnosticCode.Name, `'${local.name}' shadows the module-scope constant that this function also uses; rename one of them`)
       }
     }
     navigation.push(...refs)
+    memberNavigation.push(...members.flatMap((member) => {
+      const struct = memberOwners.get(member.name)
+      return struct ? [{ ...member, struct }] : []
+    }))
     navigation.push(...decl.attrs.flatMap((attr) => attr.args.flatMap((arg) => referencesIn(arg.tokens, decls))))
     const bodyRefs = stage ? emitEntry(decl, stage, refs) : emitFn(decl, refs)
     if (bodyRefs.length > 0) wiring.push({ fn: decl.name.name, refs: bodyRefs })
@@ -651,13 +677,18 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
   if (wiring.length > 0) b.append('\n')
   for (const { fn, refs } of wiring) b.append(`${fn}.$uses({ ${usesEntries(refs)} });\n`)
 
-  if (options.navigation && navigation.length > 0) {
+  if (options.navigation && navigation.length + memberNavigation.length > 0) {
     // Maps each reference to its declaration's TypeScript binding, for references and rename.
     b.append('\nvoid [')
     for (const ref of navigation) {
       const layout = layoutNames.get(ref.name)
       if (layout) b.append(`${layout}.entries.`)
       b.appendVerbatim(ref.start, ref.end)
+      b.append(', ')
+    }
+    for (const member of memberNavigation) {
+      b.append(`${member.struct}.propTypes.`)
+      b.appendVerbatim(member.start, member.end)
       b.append(', ')
     }
     b.append('];\n')
@@ -733,12 +764,13 @@ const DECLARATION_KEYWORDS = new Set(['let', 'var', 'const'])
  * local declaration hides a module-scope name from the end of its statement to the end of its
  * block.
  */
-function scanBody(fn: FnDecl, decls: Map<string, Decl>): { refs: Reference[]; locals: Reference[] } {
+function scanBody(fn: FnDecl, decls: Map<string, Decl>): { refs: Reference[]; locals: Reference[]; members: Reference[] } {
   const tokens = fn.body.tokens
   const scopes: Array<Set<string>> = [new Set(fn.params.map((param) => param.name.name))]
   const forScopes: number[] = []
   const pending: Array<{ name: string; scope: Set<string> }> = []
   const refs: Reference[] = []
+  const members: Reference[] = []
   const locals: Reference[] = fn.params.filter((param) => decls.has(param.name.name)).map((param) => ({ ...param.name }))
   let depth = 0
 
@@ -761,6 +793,7 @@ function scanBody(fn: FnDecl, decls: Map<string, Decl>): { refs: Reference[]; lo
       }
       continue
     }
+    if (token.kind === 'ident' && previous?.text === '.') members.push({ name: token.text, start: token.start, end: token.end })
     if (token.kind !== 'ident' || previous?.text === '.' || previous?.text === '@') continue
     if (token.text === 'for') {
       scopes.push(new Set())
@@ -782,7 +815,7 @@ function scanBody(fn: FnDecl, decls: Map<string, Decl>): { refs: Reference[]; lo
     if (scopes.some((scope) => scope.has(token.text))) continue
     if (decls.has(token.text)) refs.push({ name: token.text, start: token.start, end: token.end })
   }
-  return { refs, locals }
+  return { refs, locals, members }
 }
 
 /** Edits that turn `return x;` into `return Out(x);`. */

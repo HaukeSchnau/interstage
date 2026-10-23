@@ -59,10 +59,14 @@
   },
   "peerDependencies": {
     "typegpu": "^0.12.8",
-    "vite": ">=7"
+    "vite": ">=7",
+    "webgpu": ">=0.3"
   },
   "peerDependenciesMeta": {
     "vite": {
+      "optional": true
+    },
+    "webgpu": {
       "optional": true
     }
   },
