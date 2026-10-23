@@ -5,10 +5,7 @@ import * as compute from './fixtures/runtime/compute.wgsl'
 import * as builtins from './fixtures/runtime/builtins.wgsl'
 import * as structs from './fixtures/runtime/structs.wgsl'
 import * as particles from './fixtures/basic/src/particles.wgsl'
-import { compileErrors, gpu } from './gpu.ts'
-
-// Render passes are checked in the browser (`examples/scripts/check.ts`): Dawn's render path
-// crashes under Node with software Vulkan drivers, while shader compilation and compute work.
+import { compileErrors, gpu, renderPixels } from './gpu.ts'
 
 after(async () => (await gpu()).destroy())
 
@@ -34,4 +31,19 @@ test('a compute entry point runs with its constants, helper and binding', async 
   const expected = (index: number) => index * compute.SCALE + compute.OFFSETS[index % 2]!.y
   assert.deepEqual(result[5], { value: expected(5), doubled: expected(5) * 2 })
   assert.deepEqual(result[compute.N - 1], { value: expected(compute.N - 1), doubled: expected(compute.N - 1) * 2 })
+})
+
+test('a vertex struct output reaches a fragment struct parameter', async () => {
+  const root = await gpu()
+  const pipeline = root.createRenderPipeline({ vertex: structs.vs, fragment: structs.fs, targets: { format: 'rgba8unorm' } })
+  const pixels = await renderPixels(root, (view) => pipeline.withColorAttachment({ view, loadOp: 'clear', storeOp: 'store' }).draw(3))
+  assert.deepEqual([...pixels.slice(0, 4)], [255, 128, 64, 255])
+})
+
+test('a vertex builtin return reaches a fragment builtin parameter', async () => {
+  const root = await gpu()
+  const pipeline = root.createRenderPipeline({ vertex: builtins.vs, fragment: builtins.fs, targets: { format: 'rgba8unorm' } })
+  const pixels = await renderPixels(root, (view) => pipeline.withColorAttachment({ view, loadOp: 'clear', storeOp: 'store' }).draw(3))
+  // The pixel at (1, 0) has its center at (1.5, 0.5).
+  assert.deepEqual([...pixels.slice(4, 8)], [Math.round((1.5 / 4) * 255), Math.round((0.5 / 4) * 255), 255, 255])
 })

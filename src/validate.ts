@@ -14,18 +14,22 @@ export async function createValidator(): Promise<Validator> {
   } catch {
     throw new Error("Shader validation needs the 'webgpu' package; install it next to interstage")
   }
-  const adapter = await webgpu.create([]).requestAdapter()
+  // Dawn shuts down when the object `create` returns is garbage collected, so the validator
+  // holds on to it.
+  const gpu = webgpu.create([])
+  const adapter = await gpu.requestAdapter()
   if (!adapter) {
     throw new Error('Shader validation found no WebGPU adapter. On Linux, Dawn needs a Vulkan driver, such as Mesa lavapipe named by VK_ICD_FILENAMES')
   }
   const device = await adapter.requestDevice({
     requiredFeatures: adapter.features.has('shader-f16') ? ['shader-f16'] : [],
   })
+  const dawn = { gpu, device }
 
   return async (source) => {
-    device.pushErrorScope('validation')
-    const module = device.createShaderModule({ code: source })
-    const [info] = await Promise.all([module.getCompilationInfo(), device.popErrorScope()])
+    dawn.device.pushErrorScope('validation')
+    const module = dawn.device.createShaderModule({ code: source })
+    const [info] = await Promise.all([module.getCompilationInfo(), dawn.device.popErrorScope()])
     return info.messages
       .filter((message) => message.type === 'error')
       .map((message) => ({

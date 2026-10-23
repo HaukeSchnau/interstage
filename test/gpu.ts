@@ -3,12 +3,14 @@ import { create, globals } from 'webgpu'
 
 Object.assign(globalThis, globals)
 
+// Dawn shuts down when the object `create` returns is garbage collected.
+const dawn = create([])
 let shared: Promise<TgpuRoot> | undefined
 
 /** A TypeGPU root on Dawn, the WebGPU implementation inside Chrome. */
 export function gpu(): Promise<TgpuRoot> {
   shared ??= (async () => {
-    const adapter = await create([]).requestAdapter()
+    const adapter = await dawn.requestAdapter()
     if (!adapter) {
       throw new Error('No WebGPU adapter. Dawn uses Metal on macOS and Vulkan on Linux, where VK_ICD_FILENAMES must name a driver.')
     }
