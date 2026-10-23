@@ -1,0 +1,339 @@
+@import '@fontsource-variable/recursive/full.css';
+
+:root {
+  --void: #000000;
+  --chalk: #e8e6e1;
+  --graphite: #8a8780;
+  --seam: #2a2926;
+  --wgsl: #f2b134;
+  --ts: #7fb6ff;
+  --sans: 'Recursive Variable', system-ui, sans-serif;
+  --step--1: 0.8125rem;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.5625rem;
+  --step-5: clamp(3.5rem, 11vw, 9rem);
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--void);
+  color: var(--chalk);
+  font-family: var(--sans);
+  font-variation-settings: 'MONO' 0, 'CASL' 0;
+  font-size: 100%;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: var(--graphite);
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  text-decoration-color: currentColor;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ts);
+  outline-offset: 3px;
+}
+
+code,
+pre {
+  font-family: var(--sans);
+  font-variation-settings: 'MONO' 1, 'CASL' 0;
+  font-size: 0.875em;
+}
+
+.wgsl-mark {
+  color: var(--wgsl);
+}
+
+.ts-mark {
+  color: var(--ts);
+}
+
+/* --- Demo pages ------------------------------------------------------------------------------ */
+
+.demo canvas#stage {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  display: block;
+  touch-action: none;
+}
+
+.demo-header {
+  position: fixed;
+  top: 1.25rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  pointer-events: none;
+}
+
+.demo-header > * {
+  pointer-events: auto;
+}
+
+.demo-header .home {
+  font-variation-settings: 'MONO' 1;
+  font-size: var(--step--1);
+  color: var(--graphite);
+  text-decoration: none;
+}
+
+.demo-header .home:hover {
+  color: var(--chalk);
+}
+
+.demo-header h1 {
+  margin: 0;
+  font-size: var(--step-1);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.demo-header button.contract-toggle {
+  margin-left: auto;
+}
+
+button {
+  font: inherit;
+  font-size: var(--step--1);
+  color: var(--chalk);
+  background: rgb(0 0 0 / 0.55);
+  border: 1px solid var(--seam);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+button:hover {
+  border-color: var(--graphite);
+}
+
+button[aria-pressed='true'] {
+  border-color: var(--chalk);
+}
+
+.panel {
+  position: fixed;
+  left: 1.5rem;
+  bottom: 1.5rem;
+  width: min(21rem, calc(100vw - 3rem));
+  padding: 1rem 1.1rem 1.1rem;
+  background: rgb(0 0 0 / 0.62);
+  border: 1px solid var(--seam);
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+}
+
+.panel p {
+  margin: 0 0 0.85rem;
+  font-size: var(--step--1);
+  color: var(--graphite);
+  max-width: 42ch;
+}
+
+.panel p:last-of-type {
+  margin-bottom: 0.9rem;
+}
+
+.control {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.15rem 0.75rem;
+  align-items: baseline;
+  margin-top: 0.55rem;
+  font-size: var(--step--1);
+}
+
+.control output {
+  font-variation-settings: 'MONO' 1;
+  color: var(--graphite);
+  font-variant-numeric: tabular-nums;
+}
+
+.control input[type='range'] {
+  grid-column: 1 / -1;
+  width: 100%;
+  accent-color: var(--chalk);
+}
+
+.control code {
+  color: var(--wgsl);
+  font-size: 0.95em;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.fallback {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  padding: 2rem;
+  text-align: left;
+}
+
+.fallback p {
+  max-width: 46ch;
+  color: var(--graphite);
+}
+
+/* --- Contract drawer ------------------------------------------------------------------------- */
+
+.contract {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(46rem, 100vw);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: rgb(0 0 0 / 0.86);
+  border-left: 1px solid var(--seam);
+  backdrop-filter: blur(14px);
+  transform: translateX(100%);
+  transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.contract[data-open='true'] {
+  transform: none;
+}
+
+.contract header {
+  padding: 1.25rem 1.5rem 0.75rem;
+  border-bottom: 1px solid var(--seam);
+}
+
+.contract header p {
+  margin: 0 0 0.9rem;
+  font-size: var(--step--1);
+  color: var(--graphite);
+  max-width: 60ch;
+}
+
+.contract header .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.contract header h2 {
+  margin: 0;
+  font-size: var(--step-0);
+  font-weight: 600;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.tabs button {
+  font-variation-settings: 'MONO' 1;
+}
+
+.tabs button[data-language='wgsl'][aria-selected='true'] {
+  border-color: var(--wgsl);
+  color: var(--wgsl);
+}
+
+.tabs button[data-language='ts'][aria-selected='true'] {
+  border-color: var(--ts);
+  color: var(--ts);
+}
+
+.contract pre {
+  margin: 0;
+  padding: 1.25rem 1.5rem 3rem;
+  overflow: auto;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  tab-size: 2;
+}
+
+.code .k {
+  color: #c9a6ff;
+}
+
+.code .t {
+  color: #8fd6c7;
+}
+
+.code .n {
+  color: #f0a58f;
+}
+
+.code .c {
+  color: #6f6c66;
+  font-variation-settings: 'MONO' 1, 'CASL' 1;
+}
+
+.code .s {
+  color: #b9d98b;
+}
+
+.code .id[data-shared] {
+  text-decoration: underline dotted var(--graphite);
+  text-underline-offset: 0.25em;
+  cursor: help;
+}
+
+.code .id.lit {
+  background: rgb(242 177 52 / 0.22);
+  border-radius: 3px;
+  box-shadow: 0 0 0 2px rgb(242 177 52 / 0.22);
+}
+
+@media (max-width: 40rem) {
+  .panel {
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    width: auto;
+  }
+
+  .panel p:first-of-type {
+    display: none;
+  }
+
+  .demo-header {
+    left: 0.75rem;
+    right: 0.75rem;
+    top: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contract {
+    transition: none;
+  }
+}

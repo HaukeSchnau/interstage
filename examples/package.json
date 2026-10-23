@@ -1,0 +1,23 @@
+{
+  "name": "interstage-examples",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "contract": "tsc -p tsconfig.contract.json --runExternalCode",
+    "dev": "pnpm run contract && vite",
+    "build": "pnpm run contract && vite build",
+    "typecheck": "tsc --noEmit --runExternalCode",
+    "check": "node scripts/check.ts"
+  },
+  "dependencies": {
+    "@fontsource-variable/recursive": "^5.2.8",
+    "typegpu": "0.12.8"
+  },
+  "devDependencies": {
+    "interstage": "workspace:*",
+    "typescript": "7.1.0-beta",
+    "unplugin-typegpu": "0.12.6",
+    "vite": "^8.3.5",
+    "webgpu": "^0.6.2"
+  }
+}
