@@ -1,4 +1,5 @@
-// Loads every example in Chromium and checks that it draws frames without WebGPU errors.
+// Loads every example in Chromium and checks that it draws frames without WebGPU errors. The
+// postcard also has to take typing and a press of Send through the canvas.
 // Run after `pnpm run build`, or set ORIGIN to check a deployment. CHROME names the browser; on
 // Linux without a GPU, Chromium's SwiftShader renders WebGPU.
 import { createServer } from 'node:http'
@@ -6,7 +7,7 @@ import { readFile } from 'node:fs/promises'
 import { extname, join } from 'node:path'
 import { chromium } from 'playwright-core'
 
-const demos = ['slime', 'ink', 'sculpture', 'atlas']
+const demos = ['slime', 'ink', 'sculpture', 'atlas', 'postcard']
 const dist = join(import.meta.dirname, '../dist')
 const types: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.woff2': 'font/woff2', '.webp': 'image/webp' }
 
@@ -23,6 +24,9 @@ const origin = process.env.ORIGIN ?? `http://127.0.0.1:${(server.address() as { 
 const browser = await chromium.launch({
   executablePath: process.env.CHROME,
   args: [
+    // The postcard draws HTML into its canvas, which Chrome keeps behind these until it ships.
+    '--enable-blink-features=CanvasDrawElement',
+    '--enable-experimental-web-platform-features',
     '--enable-unsafe-webgpu',
     ...(process.platform === 'linux'
       ? ['--enable-features=Vulkan', '--use-angle=vulkan', '--use-vulkan=swiftshader', '--use-webgpu-adapter=swiftshader', '--disable-vulkan-surface']
@@ -40,6 +44,8 @@ await page.waitForTimeout(2000)
 let failures = 0
 for (const demo of demos) {
   const started = performance.now()
+  // The postcard needs room beside its panel, or the panel covers the card's Send button.
+  await page.setViewportSize(demo === 'postcard' ? { width: 1024, height: 640 } : { width: 640, height: 360 })
   await page.goto(`${origin}/${demo}/?quality=low&capture=45`)
   const result = await page
     .waitForFunction(() => window.__interstage?.capture ?? (window.__interstage?.errors.length ? 'failed' : undefined), undefined, { timeout: 180_000, polling: 1000 })
@@ -58,10 +64,23 @@ for (const demo of demos) {
       return { frames, errors, lit: lit / (pixels.length / 4) }
     }))
     .catch((error: Error) => ({ frames: 0, errors: [error.message], lit: 0 }))
+  if (demo === 'postcard' && result.errors.length === 0) result.errors.push(...(await usePostcard()))
   const ok = result.errors.length === 0 && result.lit > 0.01
   if (!ok) failures++
   const seconds = ((performance.now() - started) / 1000).toFixed(1)
   console.log(`${ok ? 'ok  ' : 'FAIL'} ${demo}: ${result.frames} frames, ${(result.lit * 100).toFixed(0)}% lit, ${seconds}s${result.errors.length ? `\n     ${result.errors.join('\n     ')}` : ''}`)
+}
+
+/** Types into the drawn form and sends it, which only works while hit testing follows the canvas. */
+async function usePostcard(): Promise<string[]> {
+  try {
+    await page.locator('input[name=to]').fill('the check')
+    await page.locator('button[type=submit]').click()
+    await page.waitForFunction(() => !document.querySelector<HTMLElement>('#card')?.inert && document.querySelector('#sent-to')?.textContent === 'the check', undefined, { timeout: 120_000 })
+    return []
+  } catch (error) {
+    return [`The postcard didn't take input: ${error instanceof Error ? error.message : String(error)}`]
+  }
 }
 
 await browser.close()

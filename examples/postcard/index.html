@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Postcard · an interstage example</title>
+  </head>
+  <body class="demo">
+    <!--
+      `content="drawable"` is the attribute's current name; Chrome builds from before mid-September
+      2026 call it `layoutsubtree`. Either one lets the card below take part in layout.
+    -->
+    <canvas id="stage" content="drawable" layoutsubtree>
+      <article id="card" drawable>
+        <form id="postcard" autocomplete="off">
+          <header>
+            <h1>Wish you were here</h1>
+            <div class="stamp" aria-hidden="true"><span id="stamp-face">🌊</span></div>
+          </header>
+          <label class="field">
+            <span>To</span>
+            <input name="to" value="Hauke" spellcheck="false" />
+          </label>
+          <label class="field message">
+            <span>Message</span>
+            <textarea name="message" rows="4" spellcheck="false">The water here is so clear you can read through it. Try typing while it ripples.</textarea>
+          </label>
+          <fieldset class="stamps">
+            <legend>Stamp</legend>
+            <label><input type="radio" name="stamp" value="🌊" checked /> 🌊 Tide</label>
+            <label><input type="radio" name="stamp" value="🌋" /> 🌋 Ember</label>
+            <label><input type="radio" name="stamp" value="🌌" /> 🌌 Night</label>
+          </fieldset>
+          <div class="row">
+            <label class="toggle"><input type="checkbox" name="airmail" checked /> <span>Airmail</span></label>
+            <label class="postage"><span>Postage</span> <input type="range" name="postage" min="1" max="5" value="3" /> <output id="postage-value">€3</output></label>
+          </div>
+          <footer>
+            <p class="postmark">Postmarked <time id="clock">--:--:--</time></p>
+            <button type="submit">Send</button>
+          </footer>
+        </form>
+        <section id="sent" hidden>
+          <p class="sent-mark">Sent</p>
+          <h1>On its way to <span id="sent-to">Hauke</span></h1>
+          <p>The postcard you wrote flew away as dust, and this receipt came back from it. Every speck carried a piece of the live page.</p>
+          <button type="button" id="again">Write another</button>
+        </section>
+      </article>
+    </canvas>
+
+    <section class="panel" aria-label="Controls">
+      <p>
+        A real HTML form, drawn into a WebGPU texture by Chrome's experimental HTML-in-Canvas API whenever it repaints, then
+        bent by TypeGPU shaders. It stays a form. Type, pick a stamp, press Send.
+      </p>
+      <p>
+        interstage's part is small. The six shaders are <code>.wgsl</code> files, and their structs and bind group layouts
+        reach TypeScript as types.
+      </p>
+      <div class="actions" aria-label="Effect">
+        <button type="button" data-mode="water" aria-pressed="true">Water</button>
+        <button type="button" data-mode="cloth" aria-pressed="false">Cloth</button>
+        <button type="button" data-mode="dust" aria-pressed="false">Dust</button>
+      </div>
+      <p class="hint" id="hint"></p>
+    </section>
+
+    <div class="unsupported" id="unsupported" hidden>
+      <h2>This demo needs HTML-in-Canvas</h2>
+      <p id="unsupported-reason"></p>
+      <p>
+        In Chrome, turn on <code>chrome://flags/#canvas-draw-element</code> and
+        <code>chrome://flags/#enable-experimental-web-platform-features</code>, then relaunch. Here is the card as plain HTML
+        in the meantime.
+      </p>
+    </div>
+
+    <script type="module" src="../src/postcard/main.ts"></script>
+  </body>
+</html>

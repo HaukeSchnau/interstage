@@ -9,7 +9,7 @@ const app = await demo({
   title: 'Atlas',
   description: [
     'A world that never ends. Drag to travel, scroll to zoom.',
-    'The terrain is WGSL, in <code>atlas.wgsl</code>. This map is a fragment shader written in TypeScript that calls its <code>elevation</code> function: pass it anything but a <code>vec2f</code> and TypeScript refuses to compile.',
+    'The terrain is WGSL, in <code>atlas.wgsl</code>. The map is a TypeGPU fragment shader written in TypeScript that calls <code>elevation</code> from that file. interstage declares the function as taking a <code>vec2f</code>, so passing anything else fails to compile.',
   ],
   controls: [
     { key: 'seaLevel', label: 'Sea level', wgsl: 'seaLevel', min: -0.3, max: 0.4, step: 0.01, value: 0.04 },
@@ -18,11 +18,10 @@ const app = await demo({
     { key: 'zoom', label: 'Zoom', min: 0.5, max: 8, step: 0.1, value: 1 },
   ],
   actions: [{ label: 'Another world', run: () => (seed = Math.random() * 100) }],
-  contract: {
-    shaders: [{ shaderName: 'atlas.wgsl', shader, declarations }],
-    host,
-    hostName: 'main.ts',
-  },
+  contract: [
+    { name: 'atlas.wgsl', shader, declarations },
+    { name: 'main.ts', source: host },
+  ],
 })
 
 /** Lowland to snow, by height above sea level. */

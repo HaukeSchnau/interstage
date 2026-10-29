@@ -32,6 +32,8 @@ root.createComputePipeline({ compute: fall }).with(bindGroup).dispatchWorkgroups
 
 interstage is a [TypeScript 7.1 content mapper](https://github.com/microsoft/typescript-go/pull/4712) and a Vite plugin. The mapper shows `tsc` and your editor each `.wgsl` file as the TypeGPU module it becomes: structs turn into schemas, each `@group` into a bind group layout, functions into typed functions and entry points into pipeline stages. The Vite plugin serves the same module at runtime. Nothing is generated on disk, so nothing can drift out of sync with the shader.
 
+interstage only writes type declarations, in about 2,000 lines. TypeGPU builds and runs the pipelines, and the optional shader check is Tint's. Content mappers are new in the TypeScript 7.1 beta, so treat interstage as an experiment.
+
 ![The slime mold example](examples/public/posters/slime.webp)
 
 ## What it catches
@@ -110,7 +112,7 @@ Function bodies stay as written. TypeGPU links them: it includes what each entry
 
 ## Examples
 
-Try them at [interstage.schnau.dev](https://interstage.schnau.dev): a slime mold simulation, ink in water, a raymarched sculpture and a topographic atlas whose fragment shader is TypeScript calling WGSL. Each has a drawer that shows its shader next to the declarations `tsc` emits for it. They live in [`examples/`](examples):
+The demos at [interstage.schnau.dev](https://interstage.schnau.dev) are TypeGPU demos whose shaders are `.wgsl` files imported through interstage: a slime mold simulation, ink in water, a raymarched sculpture, a topographic atlas whose fragment shader is TypeScript calling WGSL, and a postcard form drawn into WebGPU with Chrome's experimental HTML-in-Canvas API. Each has a drawer that shows its shaders next to the declarations interstage writes for them. They live in [`examples/`](examples):
 
 ```sh
 pnpm install
@@ -136,7 +138,7 @@ pnpm --dir examples typecheck
 pnpm --dir examples build && pnpm --dir examples check
 ```
 
-The tests compile shaders with Tint and run them on Dawn, so they need a WebGPU adapter, like the `validate` option. `examples/check` loads every demo in Chromium (set `CHROME` to its path) and fails on WebGPU errors or blank frames. `nix develop` gives a shell with Node, pnpm, Chromium and Mesa's software Vulkan driver, in which all of it runs without a GPU.
+The tests compile shaders with Tint and run them on Dawn, so they need a WebGPU adapter, like the `validate` option. `examples/check` loads every demo in Chromium (set `CHROME` to its path) and fails on WebGPU errors or blank frames. It turns on Chromium's HTML-in-Canvas flags for the postcard and sends it once. `nix develop` gives a shell with Node, pnpm, Chromium and Mesa's software Vulkan driver, in which all of it runs without a GPU.
 
 [Calder](https://calder.schnau.dev) runs these checks on every push and pull request (`.calder/ci.ts`). A pull request gets a preview of the examples, and `main` deploys them to interstage.schnau.dev. A commit that raises the version in `package.json` stages that version on npm, where a maintainer approves it with 2FA (`npm stage approve <id>`).
 

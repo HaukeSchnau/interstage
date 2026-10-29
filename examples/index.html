@@ -3,39 +3,41 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>interstage: WGSL modules for TypeScript</title>
-    <meta name="description" content="Import WGSL shaders into TypeScript as typed TypeGPU modules, checked by tsc through a TypeScript 7.1 content mapper." />
+    <title>interstage: TypeScript types for WGSL files</title>
+    <meta name="description" content="A TypeScript 7.1 content mapper that declares each .wgsl file as the TypeGPU module it becomes, so tsc checks the code that uses it." />
   </head>
   <body class="home">
-    <header class="hero">
-      <canvas id="hero" aria-hidden="true"></canvas>
-      <div class="hero-text">
-        <h1 class="wordmark">interstage</h1>
-        <p class="lede">
-          Import <span class="wgsl-mark">WGSL</span> shaders into <span class="ts-mark">TypeScript</span> as typed TypeGPU
-          modules. A TypeScript 7.1 content mapper reads your <code>.wgsl</code> files, so <code>tsc</code> and your editor
-          check every place where host code meets shader code.
-        </p>
-        <p class="links">
-          <a href="https://www.npmjs.com/package/interstage">interstage on npm</a>
-          <a href="https://github.com/HaukeSchnau/interstage">Source on GitHub</a>
-          <a href="#setup">Set it up</a>
-        </p>
-      </div>
+    <header class="intro">
+      <h1>interstage</h1>
+      <p class="lede">
+        interstage lets <code>tsc</code> and your editor read a <code>.wgsl</code> file as the
+        <a href="https://typegpu.com">TypeGPU</a> module it becomes. It is a TypeScript 7.1 content mapper and a 30-line Vite
+        plugin, about 2,000 lines in all.
+      </p>
+      <p>
+        It only writes type declarations. TypeGPU still builds and runs the pipelines, the shaders stay plain WGSL, and the
+        optional shader check is Tint's, run through the <code>webgpu</code> package. Content mappers are new in a TypeScript
+        beta, so treat this as an experiment.
+      </p>
+      <p class="links">
+        <a href="https://www.npmjs.com/package/interstage">npm</a>
+        <a href="https://github.com/HaukeSchnau/interstage">Source on GitHub</a>
+        <a href="#demos">Demos</a>
+      </p>
     </header>
 
     <main>
       <section class="pair" aria-labelledby="pair-title">
         <div class="pair-text">
-          <h2 id="pair-title">One file, two languages</h2>
+          <h2 id="pair-title">What it does</h2>
           <p>
-            The shader stays plain WGSL. interstage turns each declaration into its TypeGPU counterpart: structs into schemas,
-            each <code>@group</code> into a bind group layout, functions into typed functions and entry points into pipeline
-            stages.
+            For each declaration in a shader, interstage writes the TypeGPU declaration you would otherwise write by hand. A
+            struct becomes a schema, each <code>@group</code> a bind group layout, each function a typed function and each entry
+            point a pipeline stage.
           </p>
           <p>
-            Because <code>tsc</code> reads the shader itself, there is nothing to generate and nothing to keep in sync. Rename a
-            field in the shader and the TypeScript that writes it stops compiling.
+            <code>tsc</code> reads those declarations straight from the shader, so nothing is generated on disk. Rename a field in
+            the shader and the TypeScript that writes it stops compiling.
           </p>
         </div>
         <figure class="code-pair">
@@ -50,48 +52,9 @@
         </figure>
       </section>
 
-      <section class="demos" aria-labelledby="demos-title">
-        <h2 id="demos-title">Examples</h2>
-        <p class="section-note">Each one runs in your browser on WebGPU. Open the contract drawer on any of them to see the shader next to the declarations <code>tsc</code> emits for it.</p>
-        <ul class="demo-list">
-          <li class="demo-row">
-            <a href="slime/"><img src="posters/slime.webp" alt="Three colors of slime mold trails branching out from a central bloom" width="960" height="540" loading="lazy" /></a>
-            <div>
-              <h3><a href="slime/">Slime</a></h3>
-              <p>Hundreds of thousands of agents lay and follow trails in three competing species.</p>
-              <p class="shows">Five entry points in one WGSL module: scatter, clear, step, diffuse and a full-screen draw. The sliders write the <code>Params</code> struct field by field.</p>
-            </div>
-          </li>
-          <li class="demo-row">
-            <a href="ink/"><img src="posters/ink.webp" alt="Bright plumes of ink swirling in dark water" width="960" height="540" loading="lazy" /></a>
-            <div>
-              <h3><a href="ink/">Ink</a></h3>
-              <p>Stable fluids with vorticity confinement. Drag through the water to stir it.</p>
-              <p class="shows">Nine passes share one bind group layout of eight storage buffers, and TypeScript checks the element type of every buffer bound to it.</p>
-            </div>
-          </li>
-          <li class="demo-row">
-            <a href="sculpture/"><img src="posters/sculpture.webp" alt="An iridescent sphere carved into a lattice, with three drops melting into it" width="960" height="540" loading="lazy" /></a>
-            <div>
-              <h3><a href="sculpture/">Sculpture</a></h3>
-              <p>A gyroid lattice and three orbiting drops, raymarched with soft shadows.</p>
-              <p class="shows">A single fragment shader driven by one uniform struct, <code>Scene</code>, which TypeScript fills in by name.</p>
-            </div>
-          </li>
-          <li class="demo-row">
-            <a href="atlas/"><img src="posters/atlas.webp" alt="A topographic map of an island with contour lines and snowy highlands" width="960" height="540" loading="lazy" /></a>
-            <div>
-              <h3><a href="atlas/">Atlas</a></h3>
-              <p>An endless topographic map. Drag to travel, scroll to zoom.</p>
-              <p class="shows">The fragment shader is TypeScript and calls <code>elevation()</code> from <code>atlas.wgsl</code>, so a call with the wrong vector type fails to compile.</p>
-            </div>
-          </li>
-        </ul>
-      </section>
-
       <section class="diagnostics" aria-labelledby="diagnostics-title">
         <h2 id="diagnostics-title">What tsc tells you</h2>
-        <p class="section-note">Real output from building these examples.</p>
+        <p class="section-note">Real output from building the demos below.</p>
         <figure>
           <figcaption>With the <code>validate</code> option, Tint, the WGSL compiler inside Chrome, checks every shader during the type check. One of the first drafts of the slime mold used a reserved word:</figcaption>
           <pre class="terminal">$ tsc --noEmit --runExternalCode
@@ -137,10 +100,77 @@ export default defineConfig({ plugins: [interstage()] })</code></pre>
           </li>
         </ol>
       </section>
+      <section class="limits" aria-labelledby="limits-title">
+        <h2 id="limits-title">Limits</h2>
+        <ul>
+          <li>WGSL files can't import each other. A struct that two shaders share is written in both.</li>
+          <li><code>override</code> declarations aren't supported. Use <code>const</code>.</li>
+          <li>A runtime-sized array works as a whole storage binding, not as the last member of a struct.</li>
+          <li>TypeGPU has only square <code>f32</code> matrices, so interstage reports <code>mat2x3f</code> and <code>f16</code> matrices.</li>
+          <li>Content mappers arrived in TypeScript 7.1, which is in beta, and their protocol may still change.</li>
+        </ul>
+      </section>
+
+      <section class="demos" id="demos" aria-labelledby="demos-title">
+        <h2 id="demos-title">Demos</h2>
+        <p class="section-note">
+          These are TypeGPU demos. Each one imports its shaders as <code>.wgsl</code> files through interstage, and that import
+          is all interstage does in them. The simulations, the rendering and the input handling are TypeGPU and browser code,
+          which the drawer on each demo shows next to the shaders.
+        </p>
+        <ul class="demo-list">
+          <li class="demo-row">
+            <a href="slime/"><img src="posters/slime.webp" alt="Three colors of slime mold trails branching out from a central bloom" width="960" height="540" loading="lazy" /></a>
+            <div>
+              <h3><a href="slime/">Slime</a></h3>
+              <p>Hundreds of thousands of agents lay and follow trails in three competing species.</p>
+              <p class="shows">interstage declares the shader's <code>Params</code> struct, so the sliders can only write fields it has.</p>
+            </div>
+          </li>
+          <li class="demo-row">
+            <a href="ink/"><img src="posters/ink.webp" alt="Bright plumes of ink swirling in dark water" width="960" height="540" loading="lazy" /></a>
+            <div>
+              <h3><a href="ink/">Ink</a></h3>
+              <p>Stable fluids with vorticity confinement. Drag through the water to stir it.</p>
+              <p class="shows">Nine passes share one bind group layout. interstage writes it from the shader's <code>@group(1)</code>, and TypeGPU's types check each buffer bound to it.</p>
+            </div>
+          </li>
+          <li class="demo-row">
+            <a href="sculpture/"><img src="posters/sculpture.webp" alt="An iridescent sphere carved into a lattice, with three drops melting into it" width="960" height="540" loading="lazy" /></a>
+            <div>
+              <h3><a href="sculpture/">Sculpture</a></h3>
+              <p>A gyroid lattice and three orbiting drops, raymarched with soft shadows.</p>
+              <p class="shows">One fragment shader with one uniform struct, <code>Scene</code>, which TypeScript fills in by field name.</p>
+            </div>
+          </li>
+          <li class="demo-row">
+            <a href="atlas/"><img src="posters/atlas.webp" alt="A topographic map of an island with contour lines and snowy highlands" width="960" height="540" loading="lazy" /></a>
+            <div>
+              <h3><a href="atlas/">Atlas</a></h3>
+              <p>An endless topographic map. Drag to travel, scroll to zoom.</p>
+              <p class="shows">The map is a TypeGPU shader written in TypeScript. It calls <code>elevation()</code> from <code>atlas.wgsl</code>, with the argument types interstage declares.</p>
+            </div>
+          </li>
+          <li class="demo-row">
+            <a href="postcard/"><img src="posters/postcard.webp" alt="A postcard form hanging like cloth, one corner pulled down to show its back" width="960" height="540" loading="lazy" /></a>
+            <div>
+              <h3><a href="postcard/">Postcard</a></h3>
+              <p>
+                A working HTML form, drawn into a WebGPU texture with Chrome's experimental HTML-in-Canvas API, then rippled, hung
+                as cloth or blown away as dust. It needs two Chrome flags, which the page names.
+              </p>
+              <p class="shows">Six small shaders, each a <code>.wgsl</code> file typed by interstage. The clever part is Chrome's, which keeps the drawn form clickable.</p>
+            </div>
+          </li>
+        </ul>
+      </section>
     </main>
 
     <footer>
-      <p>interstage is open source under the MIT license. <a href="https://github.com/HaukeSchnau/interstage">Read the source</a>.</p>
+      <p>
+        interstage is open source under the MIT license. <a href="https://github.com/HaukeSchnau/interstage">Read the source</a>.
+        The demos run on <a href="https://typegpu.com">TypeGPU</a>, by Software Mansion.
+      </p>
     </footer>
     <script type="module" src="./src/index.ts"></script>
   </body>

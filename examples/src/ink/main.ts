@@ -9,7 +9,7 @@ const app = await demo({
   title: 'Ink',
   description: [
     'Drag through the water to push ink around. When you stop, an invisible brush keeps painting.',
-    'Nine entry points share one shader module and one bind group layout, <code>layout1</code>. TypeScript checks that every buffer bound to it holds the type the shader reads.',
+    "Nine entry points share one shader module. interstage turns its <code>@group(1)</code> into <code>layout1</code>, and TypeGPU's types then check that each buffer bound to it holds what the shader reads.",
   ],
   controls: [
     { key: 'swirl', label: 'Swirl', wgsl: 'swirl', min: 0, max: 40, step: 1, value: 12 },
@@ -21,11 +21,10 @@ const app = await demo({
   actions: [{ label: 'Clear the water', run: () => {
     world = createWorld()
   } }],
-  contract: {
-    shaders: [{ shaderName: 'ink.wgsl', shader, declarations }],
-    host,
-    hostName: 'main.ts',
-  },
+  contract: [
+    { name: 'ink.wgsl', shader, declarations },
+    { name: 'main.ts', source: host },
+  ],
 })
 
 const { root, values, pointer } = app

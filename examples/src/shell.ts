@@ -13,20 +13,15 @@ export interface Control {
   value: number
 }
 
-export interface ShaderContract {
-  /** The `.wgsl` file, as written. */
-  shader: string
-  shaderName: string
-  /** The declarations `tsc` emits for it. */
-  declarations: string
-}
+/** A tab in the drawer: a `.wgsl` file with the declarations `tsc` emits for it, or TypeScript that uses them. */
+export type ContractFile = { name: string; shader: string; declarations: string } | { name: string; source: string }
 
 export interface DemoOptions<Controls extends readonly Control[]> {
   title: string
   description: string[]
   controls: Controls
   actions?: Array<{ label: string; run: () => void }>
-  contract: { shaders: ShaderContract[]; host: string; hostName: string }
+  contract: ContractFile[]
 }
 
 export interface Pointer {
@@ -60,7 +55,7 @@ const params = new URLSearchParams(location.search)
 export const quality: 'low' | 'high' = params.get('quality') === 'low' ? 'low' : 'high'
 
 export async function demo<const Controls extends readonly Control[]>(options: DemoOptions<Controls>) {
-  document.title = `${options.title} · interstage`
+  document.title = `${options.title} · an interstage example`
   document.body.classList.add('demo')
   const status: NonNullable<Window['__interstage']> = { frames: 0, errors: [] }
   window.__interstage = status
@@ -70,7 +65,7 @@ export async function demo<const Controls extends readonly Control[]>(options: D
   const canvas = document.createElement('canvas')
   canvas.id = 'stage'
   document.body.append(canvas)
-  document.body.append(header(options))
+  document.body.append(header(options.title))
   // The contract is worth reading without WebGPU too, so it comes before the GPU.
   document.body.append(drawer(options.contract))
 
@@ -159,7 +154,7 @@ export async function demo<const Controls extends readonly Control[]>(options: D
         last = { x: pointer.x, y: pointer.y }
         frame({ time: (now - start) / 1000, dt, index: status.frames })
         status.frames++
-        if (offscreen && status.frames === captureAt) void capture(root, offscreen, format).then((url) => (status.capture = url))
+        if (offscreen && status.frames === captureAt) void capture(root, offscreen).then((url) => (status.capture = url))
         requestAnimationFrame(tick)
       }
       requestAnimationFrame(tick)
@@ -168,8 +163,8 @@ export async function demo<const Controls extends readonly Control[]>(options: D
 }
 
 /** Reads back the frame just drawn, for `scripts/check.ts`. */
-async function capture(root: TgpuRoot, texture: GPUTexture, format: GPUTextureFormat): Promise<string> {
-  const { width, height } = texture
+export async function capture(root: TgpuRoot, texture: GPUTexture): Promise<string> {
+  const { width, height, format } = texture
   const bytesPerRow = Math.ceil((width * 4) / 256) * 256
   const buffer = root.device.createBuffer({ size: bytesPerRow * height, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ })
   const encoder = root.device.createCommandEncoder()
@@ -197,11 +192,11 @@ async function capture(root: TgpuRoot, texture: GPUTexture, format: GPUTextureFo
   })
 }
 
-function header(options: DemoOptions<readonly Control[]>): HTMLElement {
+export function header(title: string): HTMLElement {
   const element = document.createElement('header')
   element.className = 'demo-header'
-  element.innerHTML = `<a class="home" href="../">interstage</a><h1></h1><button class="contract-toggle" type="button" aria-pressed="false" aria-controls="contract">Show the contract</button>`
-  element.querySelector('h1')!.textContent = options.title
+  element.innerHTML = `<a class="home" href="../">interstage</a><h1></h1><button class="contract-toggle" type="button" aria-pressed="false" aria-controls="contract">Show the shaders</button>`
+  element.querySelector('h1')!.textContent = title
   return element
 }
 
@@ -245,32 +240,34 @@ function panel<Controls extends readonly Control[]>(options: DemoOptions<Control
   return element
 }
 
-function drawer(contract: DemoOptions<readonly Control[]>['contract']): HTMLElement {
+export function drawer(files: ContractFile[]): HTMLElement {
   const element = document.createElement('aside')
   element.className = 'contract'
   element.id = 'contract'
   element.dataset.open = 'false'
   element.innerHTML = `
     <header>
-      <div class="row"><h2>The contract</h2><button type="button" class="close">Close</button></div>
-      <p>The <span class="wgsl-mark">shader</span> is the source of truth. <code>tsc</code> reads it through interstage and gives
-      <span class="ts-mark">TypeScript</span> the declarations below. Hover a name to see it on both sides.</p>
+      <div class="row"><h2>Shaders and their types</h2><button type="button" class="close">Close</button></div>
+      <p>A <span class="wgsl-mark">WGSL</span> tab shows the shader as written, then the declarations interstage writes for it.
+      Those declarations are all <code>tsc</code> knows about the file. A <span class="ts-mark">TypeScript</span> tab shows code
+      that uses them. Hover a name to see it on both sides.</p>
       <div class="tabs" role="tablist"></div>
     </header>
     <pre class="code" tabindex="0"></pre>`
   const tabs = element.querySelector('.tabs')!
   const pre = element.querySelector('pre')!
-  const views = [
-    ...contract.shaders.map((shader) => ({
-      name: shader.shaderName,
-      language: 'wgsl',
-      html: () => {
-        const shared = sharedNames(shader.shader, shader.declarations)
-        return `${highlight(shader.shader, 'wgsl', shared)}\n\n<span class="c">// What TypeScript sees: the declarations tsc emits for ${shader.shaderName}</span>\n\n${highlight(shader.declarations, 'ts', shared)}`
-      },
-    })),
-    { name: contract.hostName, language: 'ts', html: () => highlight(contract.host, 'ts', new Set()) },
-  ]
+  const views = files.map((file) =>
+    'shader' in file
+      ? {
+          name: file.name,
+          language: 'wgsl',
+          html: () => {
+            const shared = sharedNames(file.shader, file.declarations)
+            return `${highlight(file.shader, 'wgsl', shared)}\n\n<span class="c">// The declarations interstage writes for ${file.name}, which is what tsc sees</span>\n\n${highlight(file.declarations, 'ts', shared)}`
+          },
+        }
+      : { name: file.name, language: 'ts', html: () => highlight(file.source, 'ts', new Set()) },
+  )
   const select = (index: number) => {
     pre.innerHTML = views[index]!.html()
     pre.scrollTop = 0
@@ -313,7 +310,7 @@ function sharedNames(shader: string, declarations: string): Set<string> {
 }
 
 /** A GPU process that is still starting can answer null, so the first requests get a second chance. */
-async function requestAdapter(): Promise<GPUAdapter> {
+export async function requestAdapter(): Promise<GPUAdapter> {
   for (let attempt = 0; attempt < 5; attempt++) {
     const adapter = await navigator.gpu.requestAdapter()
     if (adapter) return adapter
@@ -325,7 +322,7 @@ async function requestAdapter(): Promise<GPUAdapter> {
 function fallback(error: unknown) {
   const element = document.createElement('div')
   element.className = 'fallback'
-  element.innerHTML = `<div><h2>This demo needs WebGPU</h2><p></p><p>It runs in current Chrome and Edge, and in Safari 26 on macOS and iOS. The contract, top right, works everywhere.</p><p><a href="../">Back to the examples</a></p></div>`
+  element.innerHTML = `<div><h2>This demo needs WebGPU</h2><p></p><p>It runs in current Chrome and Edge, and in Safari 26 on macOS and iOS. The shaders, top right, open everywhere.</p><p><a href="../">Back to the examples</a></p></div>`
   element.querySelector('p')!.textContent = error instanceof Error ? error.message : String(error)
   document.body.append(element)
 }

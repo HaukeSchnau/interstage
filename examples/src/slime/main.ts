@@ -9,7 +9,7 @@ const app = await demo({
   title: 'Slime',
   description: [
     "Hundreds of thousands of agents follow their own species' trail and avoid the others'. Hold the pointer down to draw them in.",
-    'Each slider writes one field of <code>Params</code>, a struct declared in <code>slime.wgsl</code>. TypeScript knows those fields because interstage reads the shader.',
+    'Each slider writes one field of <code>Params</code>, a struct in <code>slime.wgsl</code>. interstage declares that struct for TypeScript, so a slider can only write a field the shader has.',
   ],
   controls: [
     { key: 'speed', label: 'Speed', wgsl: 'speed', min: 10, max: 160, step: 1, value: 60 },
@@ -20,11 +20,10 @@ const app = await demo({
     { key: 'speciesCount', label: 'Species', wgsl: 'speciesCount', min: 1, max: 3, step: 1, value: 3 },
   ],
   actions: [{ label: 'Scatter again', run: () => reset() }],
-  contract: {
-    shaders: [{ shaderName: 'slime.wgsl', shader, declarations }],
-    host,
-    hostName: 'simulation.ts',
-  },
+  contract: [
+    { name: 'slime.wgsl', shader, declarations },
+    { name: 'simulation.ts', source: host },
+  ],
 })
 
 const { values, pointer, canvas } = app

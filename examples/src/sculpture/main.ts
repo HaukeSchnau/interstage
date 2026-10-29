@@ -9,7 +9,7 @@ const app = await demo({
   title: 'Sculpture',
   description: [
     'A sphere carved into a gyroid, with three drops of the same material melting into it. Drag to turn the camera.',
-    'The whole picture is one fragment shader. Its inputs are <code>Scene</code>, a uniform struct, and TypeScript fills it in by name.',
+    'The whole picture is one fragment shader. Its inputs are <code>Scene</code>, a uniform struct, which TypeScript fills in by name because interstage declares its fields.',
   ],
   controls: [
     { key: 'blend', label: 'Melt', wgsl: 'blend', min: 0.01, max: 1.2, step: 0.01, value: 0.55 },
@@ -17,11 +17,10 @@ const app = await demo({
     { key: 'thickness', label: 'Thickness', wgsl: 'thickness', min: 0.01, max: 0.15, step: 0.005, value: 0.045 },
     { key: 'hue', label: 'Hue', wgsl: 'hue', min: 0, max: 1, step: 0.01, value: 0.58 },
   ],
-  contract: {
-    shaders: [{ shaderName: 'sculpture.wgsl', shader, declarations }],
-    host,
-    hostName: 'main.ts',
-  },
+  contract: [
+    { name: 'sculpture.wgsl', shader, declarations },
+    { name: 'main.ts', source: host },
+  ],
 })
 
 const { root, values, pointer } = app

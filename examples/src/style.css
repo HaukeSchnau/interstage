@@ -12,7 +12,7 @@
   --step-0: 1rem;
   --step-1: 1.25rem;
   --step-2: 1.5625rem;
-  --step-5: clamp(3.5rem, 11vw, 9rem);
+  --step-3: clamp(2.25rem, 5vw, 3.25rem);
   color-scheme: dark;
 }
 
@@ -351,71 +351,27 @@ button[aria-pressed='true'] {
   --measure: 68rem;
 }
 
-.hero {
-  position: relative;
-  min-height: 88vh;
-  min-height: 88svh;
-  display: grid;
-  align-items: end;
-  overflow: hidden;
-  border-bottom: 1px solid var(--seam);
-}
-
-.hero canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.hero canvas.still {
-  background: radial-gradient(circle at 60% 45%, rgb(255 92 41 / 0.35), transparent 40%),
-    radial-gradient(circle at 40% 60%, rgb(41 158 255 / 0.3), transparent 45%), var(--void);
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgb(0 0 0 / 0.92) 8%, rgb(0 0 0 / 0.35) 45%, transparent 75%);
-  pointer-events: none;
-}
-
-.hero-text {
-  position: relative;
-  z-index: 1;
+.intro {
   width: min(var(--measure), 100% - 3rem);
   margin: 0 auto;
-  padding-bottom: clamp(2rem, 6vh, 4.5rem);
-  pointer-events: none;
+  padding: clamp(3rem, 10vh, 6rem) 0 0;
 }
 
-.hero-text a {
-  pointer-events: auto;
-}
-
-.wordmark {
-  margin: 0 0 1.75rem;
-  font-size: var(--step-5);
-  font-weight: 760;
+.intro h1 {
+  margin: 0 0 1.25rem;
+  font-size: var(--step-3);
+  font-weight: 700;
+  letter-spacing: -0.03em;
   line-height: 1;
-  letter-spacing: -0.045em;
-  font-variation-settings: 'MONO' 0, 'CASL' 0;
-  animation: interpolate 1.8s cubic-bezier(0.65, 0, 0.35, 1) 0.2s both;
 }
 
-@keyframes interpolate {
-  from {
-    font-variation-settings: 'MONO' 1, 'CASL' 0;
-    letter-spacing: 0;
-  }
+.intro p {
+  margin: 0 0 1rem;
+  max-width: 60ch;
 }
 
-.lede {
-  margin: 0;
-  max-width: 54ch;
-  font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+.intro .lede {
+  font-size: var(--step-1);
   line-height: 1.5;
 }
 
@@ -566,7 +522,15 @@ pre.terminal {
   margin: 0 0 0.6rem;
 }
 
-footer {
+.limits ul {
+  margin: 0;
+  padding: 0 0 0 1.25rem;
+  display: grid;
+  gap: 0.5rem;
+  max-width: 62ch;
+}
+
+body > footer {
   width: min(var(--measure), 100% - 3rem);
   margin: clamp(4rem, 10vh, 7rem) auto 0;
   padding: 1.5rem 0 3rem;
@@ -582,8 +546,3 @@ footer {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .wordmark {
-    animation: none;
-  }
-}

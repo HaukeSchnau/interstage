@@ -1,0 +1,315 @@
+@import '@fontsource/instrument-serif/400.css';
+@import '@fontsource/caveat/500.css';
+
+[hidden] {
+  display: none !important;
+}
+
+#card {
+  --ink: #0b1a33;
+  --paper: #fbfaf6;
+  --line: #d9dde5;
+  --muted: #6b7385;
+  --sea: #1f6fd1;
+  --serif: 'Instrument Serif', Georgia, serif;
+  width: 440px;
+  height: 580px;
+  padding: 26px 28px 24px;
+  border-radius: 18px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-variation-settings: 'MONO' 0, 'CASL' 0;
+  font-size: 14px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+#card form,
+#card section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#card header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+#card h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 42px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+#card .stamp {
+  flex: none;
+  width: 70px;
+  height: 84px;
+  display: grid;
+  place-items: center;
+  background: #e8f0fb;
+  font-size: 40px;
+  rotate: 4deg;
+  /* Perforated edges: a row of bites along each side. */
+  mask:
+    radial-gradient(circle 4px at 4px 4px, #0000 98%, #000) -4px -4px / 10px 10px round,
+    linear-gradient(#000 0 0) content-box;
+  padding: 6px;
+  outline: 1px solid #c9d6ea;
+  outline-offset: -8px;
+}
+
+#card .field {
+  display: grid;
+  gap: 2px;
+  margin-bottom: 14px;
+}
+
+#card .field > span,
+#card .stamps legend,
+#card .postage > span,
+#card .postmark {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+#card .field input,
+#card .field textarea {
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  padding: 4px 0 6px;
+  outline: none;
+  resize: none;
+}
+
+#card .field input {
+  font-size: 18px;
+}
+
+#card .field textarea {
+  font-family: 'Caveat', cursive;
+  font-size: 24px;
+  line-height: 1.15;
+  background-image: repeating-linear-gradient(transparent 0 27px, var(--line) 27px 28px);
+  border-bottom: 0;
+}
+
+#card .field input:focus,
+#card .field textarea:focus {
+  border-color: var(--sea);
+}
+
+#card .stamps {
+  display: flex;
+  gap: 8px;
+  border: 0;
+  padding: 0;
+  margin: 0 0 14px;
+}
+
+#card .stamps legend {
+  margin-bottom: 6px;
+}
+
+#card .stamps label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+#card .stamps input {
+  position: absolute;
+  opacity: 0;
+}
+
+#card .stamps label:has(input:checked) {
+  border-color: var(--sea);
+  background: #e8f0fb;
+}
+
+#card .stamps label:has(input:focus-visible) {
+  outline: 2px solid var(--sea);
+  outline-offset: 2px;
+}
+
+#card .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+#card .toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+#card .toggle input {
+  appearance: none;
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--line);
+  position: relative;
+  margin: 0;
+  cursor: pointer;
+  transition: background 160ms;
+}
+
+#card .toggle input::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+  transition: translate 160ms;
+}
+
+#card .toggle input:checked {
+  background: var(--sea);
+}
+
+#card .toggle input:checked::after {
+  translate: 16px 0;
+}
+
+#card .postage {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#card .postage input {
+  width: 110px;
+  accent-color: var(--sea);
+}
+
+#card .postage output {
+  min-width: 2.5ch;
+  font-variant-numeric: tabular-nums;
+}
+
+#card footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#card .postmark {
+  margin: 0;
+  font-variation-settings: 'MONO' 1;
+}
+
+#card button {
+  font: inherit;
+  backdrop-filter: none;
+  font-weight: 600;
+  font-size: 15px;
+  color: white;
+  border: 0;
+  border-radius: 999px;
+  padding: 11px 26px;
+  cursor: pointer;
+  background: linear-gradient(110deg, var(--ink) 40%, #2a4f8f 50%, var(--ink) 60%) 0 0 / 300% 100%;
+  animation: shimmer 3.2s linear infinite;
+}
+
+#card button:focus-visible {
+  outline: 2px solid var(--sea);
+  outline-offset: 3px;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+#sent {
+  justify-content: center;
+  gap: 14px;
+}
+
+#card .sent-mark {
+  align-self: flex-start;
+  margin: 0;
+  padding: 4px 12px;
+  border: 2px solid #c0392b;
+  border-radius: 6px;
+  color: #c0392b;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  rotate: -6deg;
+}
+
+#sent p:not(.sent-mark) {
+  margin: 0;
+  color: var(--muted);
+  max-width: 34ch;
+}
+
+#sent button {
+  align-self: flex-start;
+}
+
+
+.panel .hint {
+  margin: 0.9rem 0 0;
+  color: var(--chalk);
+  /* The longest hint, so switching effects doesn't resize the panel and move the card. */
+  min-height: 3lh;
+}
+
+.unsupported {
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  display: grid;
+  justify-items: center;
+  align-content: safe center;
+  gap: 18px;
+  padding: 48px 24px;
+  background: var(--void);
+}
+
+.unsupported > h2,
+.unsupported > p {
+  margin: 0;
+  max-width: 52ch;
+}
+
+.unsupported > h2 {
+  font-size: var(--step-2);
+  font-weight: 650;
+}
+
+.unsupported code {
+  font-variation-settings: 'MONO' 1;
+  font-size: 0.9em;
+  color: var(--ts);
+}
