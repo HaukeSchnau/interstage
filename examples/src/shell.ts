@@ -161,7 +161,10 @@ export async function demo<const Controls extends readonly Control[]>(options: D
         frame({ time: (now - start) / 1000, dt, index: status.frames })
         status.frames++
         if (offscreen && status.frames === captureAt) void capture(root, offscreen).then((url) => (status.capture = url))
-        requestAnimationFrame(tick)
+        // A canvas paces frames to the GPU; offscreen, the queue would grow without bound on a slow
+        // one, and the next page would wait for it to drain.
+        if (offscreen) void root.device.queue.onSubmittedWorkDone().then(() => requestAnimationFrame(tick))
+        else requestAnimationFrame(tick)
       }
       requestAnimationFrame(tick)
     },
