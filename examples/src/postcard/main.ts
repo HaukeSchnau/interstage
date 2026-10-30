@@ -2,7 +2,7 @@ import { tgpu } from 'typegpu'
 import { capture, drawer, header, requestAdapter, type ContractFile } from '../shell.ts'
 import { clothEffect } from './cloth.ts'
 import { dustEffect } from './dust.ts'
-import { drawElement, placeElement, unsupported } from './html-in-canvas.ts'
+import { drawElement, elementPlacer, unsupported } from './html-in-canvas.ts'
 import { createPage, type Card, type Effect, type Pointer, type Scene } from './scene.ts'
 import { waterEffect } from './water.ts'
 import './style.css'
@@ -267,9 +267,12 @@ async function start() {
   }
   requestAnimationFrame(frame)
 
+  const placeCard = elementPlacer(canvas, card)
   function place() {
     const placement = effect.placement()
     if (card.inert !== !placement) card.inert = !placement
-    if (placement) placeElement(canvas, card, placement)
+    if (placement) placeCard(placement)
+    // Where the card is drawn, so scripts/check.ts can click it there.
+    status.placement = placement && [placement.a, placement.b, placement.c, placement.d, placement.e, placement.f]
   }
 }

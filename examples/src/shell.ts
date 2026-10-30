@@ -45,7 +45,13 @@ export interface Frame {
 declare global {
   interface Window {
     /** Read by `scripts/check.ts` to verify each demo in a headless browser. */
-    __interstage?: { frames: number; errors: string[]; capture?: string }
+    __interstage?: {
+      frames: number
+      errors: string[]
+      capture?: string
+      /** The postcard's drawn position, as a 2D matrix from the card's box to CSS pixels. */
+      placement?: number[] | undefined
+    }
   }
 }
 
