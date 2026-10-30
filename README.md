@@ -112,7 +112,9 @@ Function bodies stay as written. TypeGPU links them: it includes what each entry
 
 ## Examples
 
-The demos at [interstage.schnau.dev](https://interstage.schnau.dev) are TypeGPU demos whose shaders are `.wgsl` files imported through interstage: a slime mold simulation, ink in water, a raymarched sculpture, a topographic atlas whose fragment shader is TypeScript calling WGSL, and a postcard form drawn into WebGPU with Chrome's experimental HTML-in-Canvas API. Each has a drawer that shows its shaders next to the declarations interstage writes for them. They live in [`examples/`](examples):
+The home page at [interstage.schnau.dev](https://interstage.schnau.dev) opens with an editor: a shader and the TypeScript that draws it, with interstage's compiler, TypeScript 6 in a worker and your browser's WGSL compiler checking them as you type, and the result running on TypeGPU next to them. TypeScript 7 has no browser build, so the editor uses the last version written in JavaScript.
+
+The demos there are TypeGPU demos whose shaders are `.wgsl` files imported through interstage: a slime mold simulation, ink in water, a raymarched sculpture, a topographic atlas whose fragment shader is TypeScript calling WGSL, and a postcard form drawn into WebGPU with Chrome's experimental HTML-in-Canvas API. Each has a drawer that shows its shaders next to the declarations interstage writes for them. They live in [`examples/`](examples):
 
 ```sh
 pnpm install
@@ -138,7 +140,7 @@ pnpm --dir examples typecheck
 pnpm --dir examples build && pnpm --dir examples check
 ```
 
-The tests compile shaders with Tint and run them on Dawn, so they need a WebGPU adapter, like the `validate` option. `examples/check` loads every demo in Chromium (set `CHROME` to its path) and fails on WebGPU errors or blank frames. It turns on Chromium's HTML-in-Canvas flags for the postcard and sends it once. `nix develop` gives a shell with Node, pnpm, Chromium and Mesa's software Vulkan driver, in which all of it runs without a GPU.
+The tests compile shaders with Tint and run them on Dawn, so they need a WebGPU adapter, like the `validate` option. `examples/check` loads every demo in Chromium (set `CHROME` to its path) and fails on WebGPU errors or blank frames. It also renames a field in the home page's editor and waits for TypeScript to report it, and it turns on Chromium's HTML-in-Canvas flags for the postcard and sends it once. `nix develop` gives a shell with Node, pnpm, Chromium and Mesa's software Vulkan driver, in which all of it runs without a GPU.
 
 [Calder](https://calder.schnau.dev) runs these checks on every push and pull request (`.calder/ci.ts`). A pull request gets a preview of the examples, and `main` deploys them to interstage.schnau.dev. A commit that raises the version in `package.json` stages that version on npm, where a maintainer approves it with 2FA (`npm stage approve <id>`).
 

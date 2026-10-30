@@ -10,10 +10,19 @@
     "check": "node scripts/check.ts"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "^6.20.4",
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/lint": "^6.9.7",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.15",
     "@fontsource-variable/recursive": "^5.2.8",
     "@fontsource/caveat": "^5.3.0",
     "@fontsource/instrument-serif": "^5.3.0",
+    "@lezer/highlight": "^1.2.5",
     "typegpu": "0.12.8",
+    "typescript-js": "npm:typescript@6.0.3",
     "wgpu-matrix": "^3.4.2"
   },
   "devDependencies": {

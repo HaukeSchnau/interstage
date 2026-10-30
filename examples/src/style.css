@@ -7,6 +7,7 @@
   --seam: #2a2926;
   --wgsl: #f2b134;
   --ts: #7fb6ff;
+  --error: #ff7b6b;
   --sans: 'Recursive Variable', system-ui, sans-serif;
   --step--1: 0.8125rem;
   --step-0: 1rem;
@@ -354,7 +355,11 @@ button[aria-pressed='true'] {
 .intro {
   width: min(var(--measure), 100% - 3rem);
   margin: 0 auto;
-  padding: clamp(3rem, 10vh, 6rem) 0 0;
+  padding: clamp(2.5rem, 8vh, 5rem) 0 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 1rem 3.5rem;
+  align-items: end;
 }
 
 .intro h1 {
@@ -363,6 +368,18 @@ button[aria-pressed='true'] {
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1;
+}
+
+/* The name starts as code and settles into prose. */
+.wordmark {
+  animation: interpolate 1.6s cubic-bezier(0.65, 0, 0.35, 1) 0.2s both;
+}
+
+@keyframes interpolate {
+  from {
+    font-variation-settings: 'MONO' 1, 'CASL' 0;
+    letter-spacing: 0;
+  }
 }
 
 .intro p {
@@ -375,10 +392,17 @@ button[aria-pressed='true'] {
   line-height: 1.5;
 }
 
+.intro .scope {
+  margin: 0 0 0.2rem;
+  color: var(--graphite);
+  font-size: 0.9375rem;
+}
+
 .links {
   display: flex;
-  gap: 1.5rem;
-  margin: 1.5rem 0 0;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin: 1.25rem 0 0;
 }
 
 main {
@@ -401,30 +425,6 @@ main h2 {
   margin: 0 0 2rem;
   color: var(--graphite);
   max-width: 62ch;
-}
-
-.pair {
-  display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-  gap: 2rem 3.5rem;
-  align-items: start;
-}
-
-.pair-text p {
-  margin: 0 0 1rem;
-  max-width: 46ch;
-}
-
-.code-pair {
-  margin: 0;
-  display: grid;
-  gap: 1rem;
-}
-
-.code-pair figcaption {
-  font-size: var(--step--1);
-  color: var(--graphite);
-  margin-bottom: 0.4rem;
 }
 
 pre.code,
@@ -540,9 +540,322 @@ body > footer {
 }
 
 @media (max-width: 52rem) {
-  .pair,
+  .intro,
   .demo-row {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
+/* --- The editor on the home page -------------------------------------------------------------- */
+
+main section.workbench {
+  padding-top: clamp(2.5rem, 6vh, 4rem);
+}
+
+/* The editor is wider than the text around it. */
+.bench {
+  --wide: min(88rem, 100vw - 3rem);
+  width: var(--wide);
+  margin-inline: calc(50% - var(--wide) / 2);
+}
+
+.workbench-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1rem 2rem;
+  margin-bottom: 1.25rem;
+}
+
+.workbench-head .section-note {
+  margin: 0;
+}
+
+.try {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.try button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.try .quiet {
+  border-color: transparent;
+  background: none;
+  color: var(--graphite);
+}
+
+.bench {
+  --pane: 31rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(15rem, 0.55fr);
+  grid-template-rows: var(--pane) auto;
+  grid-template-areas:
+    'shader main lamp'
+    'problems problems lamp';
+  border: 1px solid var(--seam);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #070706;
+}
+
+.bench .group {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+}
+
+.shader-group {
+  grid-area: shader;
+  border-right: 1px solid var(--seam);
+}
+
+.main-group {
+  grid-area: main;
+}
+
+.bench .pane {
+  min-height: 0;
+}
+
+.bench .pane[hidden] {
+  display: none;
+}
+
+.bench .tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--seam);
+}
+
+.bench .tabs button,
+.bench .tabs .tab {
+  position: relative;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: none;
+  backdrop-filter: none;
+  padding: 0.65rem 1rem 0.55rem;
+  font-size: var(--step--1);
+  font-variation-settings: 'MONO' 1;
+  color: var(--graphite);
+}
+
+.bench .tabs .tab,
+.bench .tabs [aria-selected='true'] {
+  color: var(--chalk);
+}
+
+.bench .tabs [data-language='wgsl'][aria-selected='true'] {
+  border-bottom-color: var(--wgsl);
+}
+
+.bench .tabs [data-language='ts'][aria-selected='true'],
+.bench .tabs .tab[data-language='ts'] {
+  border-bottom-color: var(--ts);
+}
+
+.bench .tabs [data-changed]::after,
+.bench .tabs [data-problems]::after {
+  content: '';
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-left: 0.5rem;
+  vertical-align: 0.1em;
+  border-radius: 50%;
+  background: var(--ts);
+}
+
+.bench .tabs [data-problems]::after {
+  background: var(--error);
+}
+
+.bench .cm-changed {
+  animation: changed 1.8s ease-out;
+}
+
+@keyframes changed {
+  from {
+    background: rgb(127 182 255 / 0.2);
+  }
+}
+
+.problems {
+  grid-area: problems;
+  border-top: 1px solid var(--seam);
+  min-height: 7.5rem;
+  max-height: 11rem;
+  overflow: auto;
+  font-size: var(--step--1);
+}
+
+.problems-head {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem 0.4rem;
+  background: #070706;
+}
+
+.problems-head h3 {
+  margin: 0;
+  font-size: var(--step--1);
+  font-weight: 600;
+}
+
+.problems-head .count {
+  font-variation-settings: 'MONO' 1;
+  color: var(--graphite);
+}
+
+.problems-head .checker {
+  margin-left: auto;
+  color: var(--graphite);
+}
+
+.problems ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0.5rem;
+}
+
+.problems li button {
+  display: block;
+  white-space: pre-wrap;
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  backdrop-filter: none;
+  padding: 0.3rem 1rem;
+  text-align: left;
+  font-variation-settings: 'MONO' 1;
+  line-height: 1.5;
+}
+
+.problems li button:hover {
+  background: rgb(255 255 255 / 0.04);
+}
+
+.problems .empty {
+  padding: 0.3rem 1rem;
+  color: var(--graphite);
+}
+
+.problems .code {
+  color: var(--error);
+}
+
+.problems .source {
+  color: var(--graphite);
+}
+
+.lamp {
+  grid-area: lamp;
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  margin: 0;
+  border-left: 1px solid var(--seam);
+  background: var(--void);
+}
+
+/* The canvas's pixel size would otherwise feed back into the height of its grid row. */
+.lamp-view {
+  position: relative;
+  min-height: 0;
+}
+
+.lamp canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+.lamp figcaption {
+  padding: 0.6rem 1rem;
+  border-top: 1px solid var(--seam);
+  font-size: var(--step--1);
+  color: var(--graphite);
+}
+
+.workbench-note {
+  margin: 1rem 0 0;
+  max-width: 88ch;
+  font-size: var(--step--1);
+  color: var(--graphite);
+}
+
+.hover {
+  padding: 0.6rem 0.8rem;
+}
+
+.hover-caption {
+  margin: 0 0 0.45rem;
+  font-size: 0.75rem;
+  color: var(--graphite);
+}
+
+.hover pre.code {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+}
+
+.hover-notes {
+  margin: 0.5rem 0 0;
+  max-width: 60ch;
+  font-size: 0.75rem;
+  color: var(--graphite);
+}
+
+@media (max-width: 75rem) {
+  .bench {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: var(--pane) auto 20rem;
+    grid-template-areas:
+      'shader main'
+      'problems problems'
+      'lamp lamp';
+  }
+
+  .lamp {
+    border-left: 0;
+    border-top: 1px solid var(--seam);
+  }
+}
+
+@media (max-width: 48rem) {
+  .bench {
+    --pane: 24rem;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: var(--pane) 20rem auto 22rem;
+    grid-template-areas: 'shader' 'main' 'problems' 'lamp';
+  }
+
+  .shader-group {
+    border-right: 0;
+    border-bottom: 1px solid var(--seam);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wordmark,
+  .bench .cm-changed {
+    animation: none;
+  }
+}

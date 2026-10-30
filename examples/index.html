@@ -8,48 +8,79 @@
   </head>
   <body class="home">
     <header class="intro">
-      <h1>interstage</h1>
-      <p class="lede">
-        interstage lets <code>tsc</code> and your editor read a <code>.wgsl</code> file as the
-        <a href="https://typegpu.com">TypeGPU</a> module it becomes. It is a TypeScript 7.1 content mapper and a 30-line Vite
-        plugin, about 2,000 lines in all.
-      </p>
-      <p>
-        It only writes type declarations. TypeGPU still builds and runs the pipelines, the shaders stay plain WGSL, and the
-        optional shader check is Tint's, run through the <code>webgpu</code> package. Content mappers are new in a TypeScript
-        beta, so treat this as an experiment.
-      </p>
-      <p class="links">
-        <a href="https://www.npmjs.com/package/interstage">npm</a>
-        <a href="https://github.com/HaukeSchnau/interstage">Source on GitHub</a>
-        <a href="#demos">Demos</a>
+      <div>
+        <h1 class="wordmark">interstage</h1>
+        <p class="lede">
+          interstage lets <code>tsc</code> and your editor read a <code>.wgsl</code> file as the
+          <a href="https://typegpu.com">TypeGPU</a> module it becomes. It is a TypeScript 7.1 content mapper and a 30-line
+          Vite plugin, about 2,000 lines in all.
+        </p>
+        <p class="links">
+          <a href="https://www.npmjs.com/package/interstage">npm</a>
+          <a href="https://github.com/HaukeSchnau/interstage">Source on GitHub</a>
+          <a href="#setup">Set it up</a>
+          <a href="#demos">Demos</a>
+        </p>
+      </div>
+      <p class="scope">
+        It only translates the shader's declarations into TypeGPU calls. TypeGPU builds and runs the pipelines, the shaders
+        stay plain WGSL, and the optional shader check is Tint's. Content mappers are new in a TypeScript beta, so treat this
+        as an experiment.
       </p>
     </header>
 
     <main>
-      <section class="pair" aria-labelledby="pair-title">
-        <div class="pair-text">
-          <h2 id="pair-title">What it does</h2>
-          <p>
-            For each declaration in a shader, interstage writes the TypeGPU declaration you would otherwise write by hand. A
-            struct becomes a schema, each <code>@group</code> a bind group layout, each function a typed function and each entry
-            point a pipeline stage.
-          </p>
-          <p>
-            <code>tsc</code> reads those declarations straight from the shader, so nothing is generated on disk. Rename a field in
-            the shader and the TypeScript that writes it stops compiling.
-          </p>
+      <section class="workbench" aria-labelledby="workbench-title">
+        <div class="workbench-head">
+          <div>
+            <h2 id="workbench-title">Edit the shader</h2>
+            <p class="section-note">
+              A real <code>lamp.wgsl</code> and the <code>main.ts</code> that draws it. Change the shader and watch what tsc
+              reads, the errors in main.ts and the lamp follow.
+            </p>
+          </div>
+          <div class="try" role="group" aria-label="Edits to try">
+            <button type="button" data-try="color">Change a color</button>
+            <button type="button" data-try="field">Add a field</button>
+            <button type="button" data-try="rename">Rename a field</button>
+            <button type="button" data-try="reserved">Use a reserved word</button>
+            <button type="button" data-try="reset" class="quiet">Start over</button>
+          </div>
         </div>
-        <figure class="code-pair">
-          <div>
-            <figcaption><span class="wgsl-mark">slime.wgsl</span>, as written</figcaption>
-            <pre class="code" id="pair-wgsl"></pre>
+
+        <div class="bench">
+          <div class="group shader-group">
+            <div class="tabs" role="tablist" aria-label="Shader">
+              <button type="button" role="tab" id="tab-shader" aria-selected="true" aria-controls="shader-editor" data-language="wgsl">lamp.wgsl</button>
+              <button type="button" role="tab" id="tab-module" aria-selected="false" aria-controls="module-view" data-language="ts">what tsc reads</button>
+            </div>
+            <div class="pane" id="shader-editor" role="tabpanel" aria-labelledby="tab-shader"></div>
+            <div class="pane" id="module-view" role="tabpanel" aria-labelledby="tab-module" hidden></div>
           </div>
-          <div>
-            <figcaption><span class="ts-mark">slime.wgsl</span>, as <code>tsc</code> sees it</figcaption>
-            <pre class="code" id="pair-ts"></pre>
+          <div class="group main-group">
+            <div class="tabs"><span class="tab" id="tab-main" data-language="ts">main.ts</span></div>
+            <div class="pane" id="main-editor"></div>
           </div>
-        </figure>
+          <div class="problems">
+            <div class="problems-head">
+              <h3>Problems</h3>
+              <span id="problem-count" class="count"></span>
+              <span id="checker-status" class="checker" aria-live="polite"></span>
+            </div>
+            <ul id="problem-list" aria-live="polite"></ul>
+          </div>
+          <figure class="lamp">
+            <div class="lamp-view"><canvas id="lamp" aria-label="The lava lamp that the code draws"></canvas></div>
+            <figcaption id="lamp-status">Starting the preview…</figcaption>
+          </figure>
+        </div>
+
+        <p class="workbench-note">
+          All of it runs in your browser. interstage's compiler writes "what tsc reads" on every keystroke, your browser's WGSL
+          compiler checks the shader, TypeScript checks main.ts in a worker, and TypeGPU draws the lamp. That TypeScript is
+          version 6, the last one written in JavaScript; in a project, tsc 7 gets the same module from the content mapper.
+          Hover a name to see its type, and Ctrl- or Cmd-click one in main.ts to jump to where it is declared.
+        </p>
       </section>
 
       <section class="diagnostics" aria-labelledby="diagnostics-title">
