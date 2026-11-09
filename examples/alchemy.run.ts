@@ -1,14 +1,18 @@
 import * as Alchemy from 'alchemy'
-import * as Cloudflare from 'alchemy/Cloudflare'
+import * as Cloudflare from '@alchemy.run/cloudflare'
 import * as Effect from 'effect/Effect'
 import * as Layer from 'effect/Layer'
 
 const production = 'prod'
 
 // `alchemy dev` keeps its state in .alchemy/, so it needs no Cloudflare account.
+// Deploys use the fleet's state store, which only Alchemy beta.85 or newer may use: older
+// versions can replace its key.
 const state = Layer.unwrap(
   Effect.gen(function* () {
-    return (yield* Alchemy.ALCHEMY_DEV) ? Alchemy.localState() : Cloudflare.state()
+    return (yield* Alchemy.ALCHEMY_DEV)
+      ? Alchemy.localState()
+      : Cloudflare.state({ workerName: 'alchemy-state-store-fleet' })
   }).pipe(Effect.orDie),
 )
 
