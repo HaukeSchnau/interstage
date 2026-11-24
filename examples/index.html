@@ -106,7 +106,7 @@ src/slime/main.ts(40,66): error TS2345: Argument of type '{ decay: number; senso
         <h2 id="setup-title">Set it up</h2>
         <ol>
           <li>
-            <p>Install interstage next to TypeScript 7.1 and TypeGPU.</p>
+            <p>Install interstage next to TypeScript 7.1 and TypeGPU. <a href="https://github.com/oxc-project/tsrs">tsrs</a>, the Rust port of TypeScript 7.1, works in its place.</p>
             <pre class="code"><code>pnpm add -D interstage typescript@beta
 pnpm add typegpu</code></pre>
           </li>
@@ -126,7 +126,7 @@ pnpm add typegpu</code></pre>
 export default defineConfig({ plugins: [interstage()] })</code></pre>
           </li>
           <li>
-            <p>Type-check with permission to run the mapper. In VS Code, the TypeScript 7 extension does the same in trusted workspaces.</p>
+            <p>Type-check with permission to run the mapper. <code>tsrs</code> takes the same flags. In VS Code, the TypeScript 7 extension does the same in trusted workspaces, on either compiler.</p>
             <pre class="code"><code>tsc --noEmit --runExternalCode</code></pre>
           </li>
         </ol>

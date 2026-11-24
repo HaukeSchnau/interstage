@@ -3,10 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "contract": "pnpm --dir .. run build && tsc -p tsconfig.contract.json --runExternalCode",
+    "contract": "pnpm --dir .. run build && tsrs -p tsconfig.contract.json --runExternalCode",
     "dev": "pnpm run contract && vite",
     "build": "pnpm run contract && vite build",
-    "typecheck": "pnpm --dir .. run build && tsc --noEmit --runExternalCode && tsc -p tsconfig.scripts.json --noEmit --runExternalCode",
+    "typecheck": "pnpm --dir .. run build && tsrs --noEmit --runExternalCode && tsrs -p tsconfig.scripts.json --noEmit --runExternalCode",
     "check": "node scripts/check.ts"
   },
   "dependencies": {
@@ -33,7 +33,7 @@
     "effect": "4.1.2",
     "interstage": "workspace:*",
     "playwright-core": "^1.64.1",
-    "typescript": "7.1.0-beta",
+    "tsrs": "^7.1.0-beta.tsrs5",
     "unplugin-typegpu": "0.12.6",
     "vite": "^8.3.5",
     "webgpu": "^0.6.2"

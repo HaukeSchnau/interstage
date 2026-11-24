@@ -6,5 +6,5 @@ export const ErrorCodes = {}
 export class RequestType {}
 export class ResponseError extends Error {}
 export function createMessageConnection(): never {
-  throw new Error('Content mappers run under tsc, not in a browser.')
+  throw new Error('Content mappers run under tsc or tsrs, not in a browser.')
 }

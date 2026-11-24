@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
+import { compilerPath, type Compiler } from './helpers.ts'
 
 export interface Location {
   file: string
@@ -14,10 +15,9 @@ interface LspRange {
   end: { line: number; character: number }
 }
 
-/** A TypeScript language server for one project, as an editor in a trusted workspace runs it. */
-export async function languageServer(project: string) {
-  const root = new URL('..', import.meta.url).pathname
-  const server = spawn(`${root}node_modules/.bin/tsc`, ['--lsp', '--stdio'], { cwd: project, stdio: ['pipe', 'pipe', 'ignore'] })
+/** The compiler's language server for one project, as an editor in a trusted workspace runs it. */
+export async function languageServer(compiler: Compiler, project: string) {
+  const server = spawn(compilerPath(compiler), ['--lsp', '--stdio'], { cwd: project, stdio: ['pipe', 'pipe', 'ignore'] })
   const pending = new Map<number, (result: unknown) => void>()
   let buffer = Buffer.alloc(0)
   let nextId = 0

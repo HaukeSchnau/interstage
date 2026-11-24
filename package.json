@@ -50,11 +50,11 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "typecheck": "pnpm run build && tsc --noEmit --runExternalCode",
+    "build": "tsrs -p tsconfig.build.json",
+    "typecheck": "pnpm run build && tsrs --noEmit --runExternalCode",
     "test": "pnpm run build && node --import ./src/register.ts --test 'test/*.test.ts'",
-    "prepare": "tsc -p tsconfig.build.json",
-    "prepack": "tsc -p tsconfig.build.json"
+    "prepare": "tsrs -p tsconfig.build.json",
+    "prepack": "tsrs -p tsconfig.build.json"
   },
   "dependencies": {
     "ts-content-mapper": "^0.1.0"
@@ -74,6 +74,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
+    "tsrs": "^7.1.0-beta.tsrs5",
     "typegpu": "0.12.8",
     "typescript": "7.1.0-beta",
     "vite": "^8.3.5",
