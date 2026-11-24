@@ -13,7 +13,7 @@ export interface Control {
   value: number
 }
 
-/** A tab in the drawer: a `.wgsl` file with the declarations `tsc` emits for it, or TypeScript that uses them. */
+/** A tab in the drawer: a `.wgsl` file with the declarations the compiler emits for it, or TypeScript that uses them. */
 export type ContractFile = { name: string; shader: string; declarations: string } | { name: string; source: string }
 
 export interface DemoOptions<Controls extends readonly Control[]> {

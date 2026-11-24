@@ -18,6 +18,9 @@ importers:
       interstage:
         specifier: link:.
         version: 'link:'
+      tsrs:
+        specifier: ^7.1.0-beta.tsrs5
+        version: 7.1.0-beta.tsrs5
       typegpu:
         specifier: 0.12.8
         version: 0.12.8
@@ -78,7 +81,7 @@ importers:
     devDependencies:
       '@alchemy.run/cloudflare':
         specifier: 2.0.0-beta.85
-        version: 2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.0))(@types/node@26.6.5)(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.0))(effect@4.1.2)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))(ws@8.22.1))(effect@4.1.2)(typescript@7.1.0-beta)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))
+        version: 2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.0))(@types/node@26.6.5)(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.0))(effect@4.1.2)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))(ws@8.22.1))(effect@4.1.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))
       '@effect/platform-node':
         specifier: 4.1.2
         version: 4.1.2(effect@4.1.2)(redis@6.3.0)
@@ -97,9 +100,9 @@ importers:
       playwright-core:
         specifier: ^1.64.1
         version: 1.64.1
-      typescript:
-        specifier: 7.1.0-beta
-        version: 7.1.0-beta
+      tsrs:
+        specifier: ^7.1.0-beta.tsrs5
+        version: 7.1.0-beta.tsrs5
       unplugin-typegpu:
         specifier: 0.12.6
         version: 0.12.6(rolldown@1.2.15)(typegpu@0.12.8)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))
@@ -812,6 +815,58 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
+  '@tsrs/darwin-arm64@7.1.0-beta.tsrs5':
+    resolution: {integrity: sha512-wRLJq3IDZjdLrh+lsipipCfYPpFjNW/0zjeM9azNLjA33OWjOIxT2THiKExf7bjkbr6SGCrrjDR+ZZyXYz4Rjg==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@tsrs/darwin-x64@7.1.0-beta.tsrs5':
+    resolution: {integrity: sha512-jTZgFXcnDbkDZwq121fhcZv8YaoJCzSWshJJYRnfc2QqagI31Fn9Vjbiz/GgfoAvw32vK8OZrNCDzN2Cu9UkDQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@tsrs/linux-arm64-gnu@7.1.0-beta.tsrs5':
+    resolution: {integrity: sha512-o0ofV8Yw5IbaXR7wjIHaqBv9YddJ6Weot+IpYWfUNqG3YpAe4N5G0dU9vsCLX7eNNYx1mMyIZK0eyMV1r6qg2g==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@tsrs/linux-arm64-musl@7.1.0-beta.tsrs5':
+    resolution: {integrity: sha512-Nki4kxNnp8qO+/8MtZeO0cAt8ifGHPbC9R0BepVlLuDdvR2cqfzym+l75zXtvnwW1nekmKwbNpHqsuHXoITYGQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@tsrs/linux-x64-gnu@7.1.0-beta.tsrs5':
+    resolution: {integrity: sha512-hyg70btCCaMT3RvFYU0KEibFyQjFUUfrqk4zTl7rf/7G3HPO3X6sEs8J/AHYUvJB0cA+dXgU/adkiZf1XJI/XA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@tsrs/linux-x64-musl@7.1.0-beta.tsrs5':
+    resolution: {integrity: sha512-5RI2Ziy8eSkvUi/oeQbrCSzJC/AP7DCtn9IEOWS74BhuQK7WUr1op5ozQMsn4kA6DfuCAuYSQZygTk2Zv3Ib+g==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@tsrs/win32-arm64@7.1.0-beta.tsrs5':
+    resolution: {integrity: sha512-RqvW3yaksYl8h8m+aHGfWT9He6AwgvhJ38+8rcuE+Mz12DxVLeRVvWco5k1DZ3nMT056Erohyuwuv4F3A5Tnww==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@tsrs/win32-x64@7.1.0-beta.tsrs5':
+    resolution: {integrity: sha512-ZTEC3ITNsWH54a/0CtlRhNNfstVFHeg40sUjuQMYIlLiLxRFOXOPjFL/eyjZAS/1fNM+DGtz+6RY6AAMdqyoXw==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [win32]
+
   '@types/node@26.6.5':
     resolution: {integrity: sha512-uMzsv9stDdofIZBx4UGh4Z9ZgXnGC9seRDscilBcTHAeOFk67MZg/k9bWVfO+bk4qZmG+l52hRnLwUiH2LnJTg==}
 
@@ -1260,6 +1315,11 @@ packages:
   tsover-runtime@0.0.7:
     resolution: {integrity: sha512-FHHwMJzZbnP23+fU1PxXljy7j0RRRosL2r1/CRUNTqfW+l7m35JsUkM615x/cAzw4GqRdXPIl3axKMj9qzpZtQ==}
 
+  tsrs@7.1.0-beta.tsrs5:
+    resolution: {integrity: sha512-z+hNizBykB1mv/XxMnMYMSGuwnYEk6S708LGEEaTmdLu6eaH4NOtVemySycbEiW/SCjMeYMk+SZfVdRJwEmYXA==}
+    engines: {node: '>=16.20.0'}
+    hasBin: true
+
   typed-binary@4.3.4:
     resolution: {integrity: sha512-ivy9nisfsBhugH6OrygtdYI28c28mo7AFeB85COUzGG6MmuViFQPz4ylmDHNjAI3P12EAxWhqtjLsdYWfCj6xQ==}
 
@@ -1438,13 +1498,13 @@ snapshots:
       alchemy: 2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.0))(effect@4.1.2)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))(ws@8.22.1)
       effect: 4.1.2
 
-  '@alchemy.run/cloudflare-runtime@2.0.0-beta.85(@distilled.cloud/cloudflare@1.0.0-rc.18(effect@4.1.2))(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.0))(@types/node@26.6.5)(effect@4.1.2)(rolldown@1.2.13)(typescript@7.1.0-beta)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))':
+  '@alchemy.run/cloudflare-runtime@2.0.0-beta.85(@distilled.cloud/cloudflare@1.0.0-rc.18(effect@4.1.2))(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.0))(@types/node@26.6.5)(effect@4.1.2)(rolldown@1.2.13)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))':
     dependencies:
       '@alchemy.run/node-utils': 2.0.0-beta.85
       '@cloudflare/unenv-preset': 2.16.2(unenv@2.0.0-rc.24)(workerd@1.20261026.1)
       '@distilled.cloud/cloudflare': 1.0.0-rc.18(effect@4.1.2)
       '@puppeteer/browsers': 3.2.6(yauzl@3.4.0)
-      capnp-es: 0.0.16(typescript@7.1.0-beta)
+      capnp-es: 0.0.16(typescript@6.0.3)
       effect: 4.1.2
       magic-string: 0.30.21
       mime: 4.1.1
@@ -1461,10 +1521,10 @@ snapshots:
       - proxy-agent
       - typescript
 
-  '@alchemy.run/cloudflare@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.0))(@types/node@26.6.5)(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.0))(effect@4.1.2)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))(ws@8.22.1))(effect@4.1.2)(typescript@7.1.0-beta)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))':
+  '@alchemy.run/cloudflare@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.0))(@types/node@26.6.5)(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.0))(effect@4.1.2)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))(ws@8.22.1))(effect@4.1.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))':
     dependencies:
       '@alchemy.run/acme': 2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.0))(effect@4.1.2)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))(ws@8.22.1))(effect@4.1.2)
-      '@alchemy.run/cloudflare-runtime': 2.0.0-beta.85(@distilled.cloud/cloudflare@1.0.0-rc.18(effect@4.1.2))(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.0))(@types/node@26.6.5)(effect@4.1.2)(rolldown@1.2.13)(typescript@7.1.0-beta)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))
+      '@alchemy.run/cloudflare-runtime': 2.0.0-beta.85(@distilled.cloud/cloudflare@1.0.0-rc.18(effect@4.1.2))(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.0))(@types/node@26.6.5)(effect@4.1.2)(rolldown@1.2.13)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))
       '@alchemy.run/docker': 2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.0))(effect@4.1.2)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))(ws@8.22.1))(effect@4.1.2)
       '@alchemy.run/sql': 2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.0))(effect@4.1.2)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))(ws@8.22.1))(effect@4.1.2)
       '@distilled.cloud/aws': 1.0.0-rc.18(effect@4.1.2)
@@ -1962,6 +2022,30 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
+  '@tsrs/darwin-arm64@7.1.0-beta.tsrs5':
+    optional: true
+
+  '@tsrs/darwin-x64@7.1.0-beta.tsrs5':
+    optional: true
+
+  '@tsrs/linux-arm64-gnu@7.1.0-beta.tsrs5':
+    optional: true
+
+  '@tsrs/linux-arm64-musl@7.1.0-beta.tsrs5':
+    optional: true
+
+  '@tsrs/linux-x64-gnu@7.1.0-beta.tsrs5':
+    optional: true
+
+  '@tsrs/linux-x64-musl@7.1.0-beta.tsrs5':
+    optional: true
+
+  '@tsrs/win32-arm64@7.1.0-beta.tsrs5':
+    optional: true
+
+  '@tsrs/win32-x64@7.1.0-beta.tsrs5':
+    optional: true
+
   '@types/node@26.6.5':
     dependencies:
       undici-types: 8.9.0
@@ -2064,9 +2148,9 @@ snapshots:
       '@babel/parser': 7.29.9
       pathe: 2.0.3
 
-  capnp-es@0.0.16(typescript@7.1.0-beta):
+  capnp-es@0.0.16(typescript@6.0.3):
     optionalDependencies:
-      typescript: 7.1.0-beta
+      typescript: 6.0.3
 
   capnweb@0.12.0: {}
 
@@ -2320,6 +2404,17 @@ snapshots:
     optional: true
 
   tsover-runtime@0.0.7: {}
+
+  tsrs@7.1.0-beta.tsrs5:
+    optionalDependencies:
+      '@tsrs/darwin-arm64': 7.1.0-beta.tsrs5
+      '@tsrs/darwin-x64': 7.1.0-beta.tsrs5
+      '@tsrs/linux-arm64-gnu': 7.1.0-beta.tsrs5
+      '@tsrs/linux-arm64-musl': 7.1.0-beta.tsrs5
+      '@tsrs/linux-x64-gnu': 7.1.0-beta.tsrs5
+      '@tsrs/linux-x64-musl': 7.1.0-beta.tsrs5
+      '@tsrs/win32-arm64': 7.1.0-beta.tsrs5
+      '@tsrs/win32-x64': 7.1.0-beta.tsrs5
 
   typed-binary@4.3.4: {}
 

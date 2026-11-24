@@ -65,6 +65,8 @@ In the editor, the TypeScript language server goes to the WGSL declaration of an
    pnpm add typegpu
    ```
 
+   [tsrs](https://github.com/oxc-project/tsrs), the Rust port of TypeScript 7.1, runs interstage too. To use it, install `tsrs` in place of `typescript@beta` and run `tsrs` where this guide says `tsc`.
+
 2. Register the content mapper in `tsconfig.json`. TypeGPU's declarations need `skipLibCheck` under TypeScript 7.
 
    ```jsonc
@@ -92,7 +94,7 @@ In the editor, the TypeScript language server goes to the WGSL declaration of an
    tsc --noEmit --runExternalCode
    ```
 
-   VS Code's TypeScript 7 extension starts content mappers in trusted workspaces.
+   VS Code's TypeScript 7 extension starts content mappers in trusted workspaces. To run tsrs's language server in it on macOS or Linux, set `"js/ts.experimental.useTsgo": true` and `"js/ts.tsdk.path": "./node_modules/tsrs/tsdk"` in `.vscode/settings.json`. Windows needs tsrs's platform package instead; see [its editor setup](https://github.com/oxc-project/tsrs/blob/main/docs/LSP.md#editor-setup).
 
 ## How a shader becomes a module
 
@@ -140,7 +142,7 @@ pnpm --dir examples typecheck
 pnpm --dir examples build && pnpm --dir examples check
 ```
 
-The tests compile shaders with Tint and run them on Dawn, so they need a WebGPU adapter, like the `validate` option. `examples/check` loads every demo in Chromium (set `CHROME` to its path) and fails on WebGPU errors or blank frames. It also renames a field in the home page's editor and waits for TypeScript to report it, and it turns on Chromium's HTML-in-Canvas flags for the postcard and sends it once. `nix develop` gives a shell with Node, pnpm, Chromium and Mesa's software Vulkan driver, in which all of it runs without a GPU.
+The tests type-check the fixtures and drive the language server under both `tsc` and `tsrs`. They compile shaders with Tint and run them on Dawn, so they need a WebGPU adapter, like the `validate` option. The repository builds and type-checks itself with tsrs. `examples/check` loads every demo in Chromium (set `CHROME` to its path) and fails on WebGPU errors or blank frames. It also renames a field in the home page's editor and waits for TypeScript to report it, and it turns on Chromium's HTML-in-Canvas flags for the postcard and sends it once. `nix develop` gives a shell with Node, pnpm, Chromium and Mesa's software Vulkan driver, in which all of it runs without a GPU.
 
 [Calder](https://calder.schnau.dev) runs these checks on every push and pull request (`.calder/ci.ts`). A pull request gets a preview of the examples, and `main` deploys them to interstage.schnau.dev. A commit that raises the version in `package.json` stages that version on npm, where a maintainer approves it with 2FA (`npm stage approve <id>`).
 

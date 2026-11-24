@@ -54,11 +54,12 @@ down when the object `create()` returns is garbage collected, so the validator h
 
 ## Facts this relies on
 
-Checked against `typescript@7.1.0-beta` and `typegpu@0.12.8`:
+Checked against `typescript@7.1.0-beta`, `tsrs@7.1.0-beta.tsrs5` and `typegpu@0.12.8`:
 
-- `tsc` needs `--runExternalCode`; the language server takes `initializationOptions.runExternalCode`.
-- A mapper's diagnostics count as syntax errors, and `tsc` reports no semantic errors in a program
-  that has syntax errors.
+- `tsc` and `tsrs` need `--runExternalCode`; their language servers take
+  `initializationOptions.runExternalCode`.
+- A mapper's diagnostics count as syntax errors, and neither compiler reports semantic errors in a
+  program that has syntax errors.
 - The DOM library in TypeScript 7.1 includes WebGPU, so `@webgpu/types` conflicts with it, and
   TypeGPU's declarations need `skipLibCheck`.
 - TypeGPU keeps getters in `$uses` lazy and replaces external names in WGSL text by pattern, not
