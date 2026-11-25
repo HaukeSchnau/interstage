@@ -42,7 +42,7 @@ for (const compiler of compilers) {
           at("src/main.ts", "  wrap(p)", 2),
           at("src/particles.wgsl", "fn wrap", 3),
           at("src/particles.wgsl", "= wrap(", 2),
-        ].sort(),
+        ].toSorted(),
       );
     });
 
@@ -61,7 +61,7 @@ for (const compiler of compilers) {
           at("src/main.ts", "particle.velocity", 9),
           at("src/particles.wgsl", "velocity: vec2f"),
           ...shaderUses,
-        ].sort(),
+        ].toSorted(),
       );
     });
 
@@ -81,7 +81,7 @@ for (const compiler of compilers) {
 
       assert.deepEqual(
         refs,
-        [at("src/particles.wgsl", "var<uniform> params", 13), ...bindGroupKeys, ...uses].sort(),
+        [at("src/particles.wgsl", "var<uniform> params", 13), ...bindGroupKeys, ...uses].toSorted(),
       );
     });
   });

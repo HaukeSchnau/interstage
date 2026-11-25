@@ -143,5 +143,5 @@ export async function languageServer(compiler: Compiler, project: string) {
 export function where(locations: Location[]): string[] {
   return locations
     .map((location) => `${location.file}:${location.line}:${location.character}`)
-    .sort();
+    .toSorted();
 }

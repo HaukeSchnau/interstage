@@ -30,21 +30,21 @@ const runs = [
   },
 ];
 
-const viewports: Record<string, { width: number; height: number }> = {
-  editor: { width: 1280, height: 800 },
+const viewports = new Map([
+  ["editor", { width: 1280, height: 800 }],
   // The postcard needs room beside its panel, or the panel covers the card's Send button.
-  postcard: { width: 1024, height: 640 },
-};
+  ["postcard", { width: 1024, height: 640 }],
+]);
 
 const dist = join(import.meta.dirname, "../dist");
 
-const types: Record<string, string> = {
-  ".html": "text/html",
-  ".js": "text/javascript",
-  ".css": "text/css",
-  ".woff2": "font/woff2",
-  ".webp": "image/webp",
-};
+const types = new Map([
+  [".html", "text/html"],
+  [".js", "text/javascript"],
+  [".css", "text/css"],
+  [".woff2", "font/woff2"],
+  [".webp", "image/webp"],
+]);
 
 const server = createServer(async (request, response) => {
   const path = new URL(request.url ?? "/", "http://localhost").pathname;
@@ -53,7 +53,7 @@ const server = createServer(async (request, response) => {
 
   if (body)
     response
-      .writeHead(200, { "content-type": types[extname(file)] ?? "application/octet-stream" })
+      .writeHead(200, { "content-type": types.get(extname(file)) ?? "application/octet-stream" })
       .end(body);
   else response.writeHead(404).end();
 });
@@ -97,7 +97,7 @@ for (const run of runs) {
 
   for (const demo of run.demos) {
     const started = performance.now();
-    await page.setViewportSize(viewports[demo] ?? { width: 640, height: 360 });
+    await page.setViewportSize(viewports.get(demo) ?? { width: 640, height: 360 });
     await page.goto(
       demo === "editor" ? `${origin}/?capture=45` : `${origin}/${demo}/?quality=low&capture=45`,
     );

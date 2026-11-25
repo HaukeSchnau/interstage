@@ -608,12 +608,7 @@ function applyBinary(op: string, left: Value, right: Value): Value {
     if (a.ty.scalar !== "bool" || b.ty.scalar !== "bool")
       throw new EvalError(`'${op}' needs bools`);
 
-    return scalar(
-      "bool",
-      op === "&&"
-        ? (a.value as boolean) && (b.value as boolean)
-        : (a.value as boolean) || (b.value as boolean),
-    );
+    return scalar("bool", op === "&&" ? a.value && b.value : a.value || b.value);
   }
 
   const type = op === "<<" || op === ">>" ? a.ty.scalar : unifyScalar(a.ty.scalar, b.ty.scalar);
@@ -683,7 +678,7 @@ function callMath(name: string, math: (...args: number[]) => number, args: Value
     if (!("value" in arg) || arg.ty.scalar === "bool")
       throw new EvalError(`${name}() takes numbers in constants`);
 
-    return arg as Extract<Value, { value: unknown }>;
+    return arg;
   });
 
   const type = scalars.map((arg) => arg.ty.scalar).reduce(unifyScalar);

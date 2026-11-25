@@ -418,18 +418,19 @@ export function mountEditor() {
     ] as const) {
       const length = view.state.doc.length;
 
-      const diagnostics = all
-        .filter((problem) => problem.file === file && problem.code !== "runtime")
-        .map((problem): Diagnostic => {
-          const from = Math.min(problem.from, length);
+      const diagnostics = all.flatMap((problem): Diagnostic[] => {
+        if (problem.file !== file || problem.code === "runtime") return [];
+        const from = Math.min(problem.from, length);
 
-          return {
+        return [
+          {
             from,
             to: Math.min(Math.max(problem.to, from + 1), length),
             severity: "error",
             message: `${problem.code}: ${problem.message}`,
-          };
-        });
+          },
+        ];
+      });
 
       view.dispatch(setDiagnostics(view.state, diagnostics));
     }
@@ -545,12 +546,15 @@ export function mountEditor() {
         selection: { anchor: from },
       });
 
-      for (const [index, char] of [...insert].entries()) {
+      let offset = from;
+
+      for (const char of insert) {
         shaderView.dispatch({
-          changes: { from: from + index, insert: char },
-          selection: { anchor: from + index + 1 },
+          changes: { from: offset, insert: char },
+          selection: { anchor: offset + char.length },
           scrollIntoView: true,
         });
+        offset += char.length;
         await pause(55);
       }
 

@@ -5,10 +5,15 @@ import { capture } from "../shell.ts";
 declare global {
   // The modules that the editor's code imports, while it loads; see `load`. A `var` declaration
   // is what puts a property on `globalThis`'s type.
-  var __interstageEditor: Record<string, object> | undefined;
+  var __interstageEditor: Map<string, object> | undefined;
 }
 
 export type Preview = Awaited<ReturnType<typeof createPreview>>;
+
+/** What main.ts registers through `page.onFrame`. */
+interface Registered {
+  draw?: (time: number) => void;
+}
 
 interface Options {
   /** With `?capture=N`, every Nth frame is read back for scripts/check.ts. */
@@ -110,7 +115,7 @@ export function createPreview(canvas: HTMLCanvasElement, device: GPUDevice, opti
     async run(key: string, shaderModule: string, main: string): Promise<string | undefined> {
       if (running?.key === key) return undefined;
       const root = tgpu.initFromDevice({ device });
-      const registered: { draw?: (time: number) => void } = {};
+      const registered: Registered = {};
 
       const page = {
         root,
@@ -120,11 +125,15 @@ export function createPreview(canvas: HTMLCanvasElement, device: GPUDevice, opti
         onFrame: (draw: (time: number) => void) => (registered.draw = draw),
       };
 
-      const modules: Record<string, object> = { typegpu, "./page": page };
+      const modules = new Map<string, object>([
+        ["typegpu", typegpu],
+        ["./page", page],
+      ]);
+
       globalThis.__interstageEditor = modules;
 
       try {
-        modules["./lamp.wgsl"] = await load(shaderModule);
+        modules.set("./lamp.wgsl", await load(shaderModule));
         await load(main);
         const { draw } = registered;
 
@@ -164,11 +173,11 @@ async function load(code: string): Promise<object> {
       _quote?: string,
       specifier = "",
     ) => {
-      if (!globalThis.__interstageEditor?.[specifier])
+      if (!globalThis.__interstageEditor?.has(specifier))
         throw new Error(
           `There is no '${specifier}' here. The editor has typegpu, ./lamp.wgsl and ./page.`,
         );
-      const module = `globalThis.__interstageEditor[${JSON.stringify(specifier)}]`;
+      const module = `globalThis.__interstageEditor.get(${JSON.stringify(specifier)})`;
 
       return [
         defaultName && `const ${defaultName} = ${module}.default;`,

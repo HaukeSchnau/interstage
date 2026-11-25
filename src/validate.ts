@@ -1,3 +1,5 @@
+import type * as WebGPU from "webgpu";
+
 import { DiagnosticCode, type Diagnostic } from "./compile.ts";
 
 export type Validator = (source: string) => Promise<Diagnostic[]>;
@@ -8,7 +10,7 @@ export type Validator = (source: string) => Promise<Diagnostic[]>;
  * uniformity and the rules of each shader stage.
  */
 export async function createValidator(): Promise<Validator> {
-  let webgpu: typeof import("webgpu");
+  let webgpu: typeof WebGPU;
 
   try {
     webgpu = await import("webgpu");

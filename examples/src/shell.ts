@@ -69,7 +69,7 @@ export async function demo<const Controls extends readonly Control[]>(
   document.body.classList.add("demo");
   const status: NonNullable<Window["__interstage"]> = { frames: 0, errors: [] };
   window.__interstage = status;
-  addEventListener("error", (event) => status.errors.push(String(event.message)));
+  addEventListener("error", (event) => status.errors.push(event.message));
   addEventListener("unhandledrejection", (event) => status.errors.push(String(event.reason)));
 
   const canvas = document.createElement("canvas");
@@ -236,11 +236,8 @@ export async function capture(root: TgpuRoot, texture: GPUTexture): Promise<stri
   canvas.getContext("2d")!.putImageData(pixels, 0, 0);
   const blob = await canvas.convertToBlob({ type: "image/png" });
 
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.readAsDataURL(blob);
-  });
+  // scripts/check.ts loads it into an image on this page.
+  return URL.createObjectURL(blob);
 }
 
 export function header(title: string): HTMLElement {
@@ -359,7 +356,11 @@ export function drawer(files: ContractFile[]): HTMLElement {
   select(0);
 
   pre.addEventListener("pointerover", (event) => {
-    const target = (event.target as HTMLElement).closest<HTMLElement>(".id[data-shared]");
+    const target =
+      event.target instanceof Element
+        ? event.target.closest<HTMLElement>(".id[data-shared]")
+        : null;
+
     pre.querySelectorAll(".lit").forEach((node) => node.classList.remove("lit"));
 
     if (target)

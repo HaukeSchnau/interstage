@@ -43,7 +43,7 @@ export function dustEffect(scene: Scene): Dust {
   });
 
   const backdrop = createStage(scene);
-  const [texelsAcross = 1, texelsDown = 1] = scene.page.props.size;
+  const [texelsAcross, texelsDown] = scene.page.props.size;
 
   const createCloud = () => {
     const { card } = scene;

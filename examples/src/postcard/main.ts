@@ -11,7 +11,7 @@ const status: NonNullable<Window["__interstage"]> = { frames: 0, errors: [] };
 
 window.__interstage = status;
 
-addEventListener("error", (event) => status.errors.push(String(event.message)));
+addEventListener("error", (event) => status.errors.push(event.message));
 
 addEventListener("unhandledrejection", (event) => status.errors.push(String(event.reason)));
 

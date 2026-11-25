@@ -56,29 +56,109 @@ export default defineConfig({
       "eslint/eqeqeq": "error",
       "typescript/consistent-type-imports": "error",
       "typescript/no-explicit-any": "error",
-      "typescript/no-non-null-assertion": "error",
       "unicorn/prefer-node-protocol": "error",
 
       "oxc/no-accumulating-spread": "error",
       "anti-slop/no-array-filter-map": "error",
       "anti-slop/no-reduce-accumulator-copy": "error",
-      "anti-slop/no-chained-type-assertions": "error",
       "anti-slop/no-conditional-empty-object-spread": "error",
       "anti-slop/no-known-value-widening": "error",
       "anti-slop/no-module-mocking": "error",
-      "anti-slop/no-object-parameters": "error",
       "anti-slop/no-reflect-apply": "error",
       "anti-slop/no-reflect-get": "error",
       "anti-slop/no-runtime-typeof": "error",
       "anti-slop/no-shape-in-symbol-names": "error",
-      "anti-slop/no-unknown-parameters": "error",
       "anti-slop/no-unknown-returns": "error",
       "anti-slop/no-unknown-type-aliases": "error",
       "anti-slop/no-unsafe-dictionary-type": "error",
       "anti-slop/no-widen-then-assert": "error",
       "anti-slop/require-readable-spacing": "error",
-      "anti-slop/require-safety-comment-for-type-assertion": "error",
+
+      // The compiler and the demos index arrays and tuples under noUncheckedIndexedAccess where the
+      // index is in range by construction: 117 findings, 58 of them in src/. Replacing them with
+      // checked access is a refactor of the compiler and every demo.
+      // https://oxc.rs/docs/guide/usage/linter/rules/typescript/no-non-null-assertion.html
+      "typescript/no-non-null-assertion": "off",
+
+      // `typescript/no-unsafe-type-assertion` already rejects narrowing casts, so a comment on a
+      // safe upcast adds friction without safety.
+      // https://github.com/dmmulroy/anti-slop/blob/63dbb09/src/rules/require-safety-comment-for-type-assertion.ts
+      "anti-slop/require-safety-comment-for-type-assertion": "off",
+
+      // Sequential awaits are deliberate here: scripts/check.ts loads one demo at a time, and the
+      // editor's checker files are read in dependency order.
+      // https://oxc.rs/docs/guide/usage/linter/rules/eslint/no-await-in-loop.html
+      "eslint/no-await-in-loop": "off",
+
+      // Reusing a precise name in a nested callback reads better, and TypeScript resolves the scopes.
+      // https://oxc.rs/docs/guide/usage/linter/rules/eslint/no-shadow.html
+      "eslint/no-shadow": "off",
+
+      // A small helper beside its only caller reads better than one hoisted for a tiny allocation.
+      // https://oxc.rs/docs/guide/usage/linter/rules/unicorn/consistent-function-scoping.html
+      "unicorn/consistent-function-scoping": "off",
+
+      // It misreads exhaustive switches over tagged unions; `noImplicitReturns` covers missing returns.
+      // https://oxc.rs/docs/guide/usage/linter/rules/typescript/consistent-return.html
+      "typescript/consistent-return": "off",
+
+      // Small immutable updates read better as spreads than as mutation.
+      // https://oxc.rs/docs/guide/usage/linter/rules/oxc/no-map-spread.html
+      "oxc/no-map-spread": "off",
+
+      // `window.__interstage` is the demos' hook for scripts/check.ts, named so that no page global
+      // can collide with it.
+      // https://oxc.rs/docs/guide/usage/linter/rules/eslint/no-underscore-dangle.html
+      "eslint/no-underscore-dangle": "off",
+
+      // Each cast sits where TypeScript can't relate the types: the evaluator's Value union, which
+      // narrows by `ty` rather than by a tag (22 in src/), replies over postMessage and JSON-RPC, a
+      // method picked from a union of methods, Object.fromEntries over the controls' keys and
+      // server.address() (6 elsewhere). Removing them is a redesign of each.
+      // https://oxc.rs/docs/guide/usage/linter/rules/typescript/no-unsafe-type-assertion.html
+      "typescript/no-unsafe-type-assertion": "off",
+
+      // Error handlers and the replies of the two RPC clients (test/lsp.ts and the editor's
+      // checker worker) receive values whose type isn't known yet: 5 findings.
+      // https://github.com/dmmulroy/anti-slop/blob/63dbb09/src/rules/no-unknown-parameters.ts
+      "anti-slop/no-unknown-parameters": "off",
+
+      // test/lsp.ts sends JSON-RPC messages whose params differ per method: 2 findings.
+      // https://github.com/dmmulroy/anti-slop/blob/63dbb09/src/rules/no-object-parameters.ts
+      "anti-slop/no-object-parameters": "off",
+
+      // The editor's capture mode hands TypeGPU a stand-in canvas context that has only
+      // getCurrentTexture(), which is all TypeGPU reads: 1 finding.
+      // https://github.com/dmmulroy/anti-slop/blob/63dbb09/src/rules/no-chained-type-assertions.ts
+      "anti-slop/no-chained-type-assertions": "off",
+
+      // It reads every postMessage as window.postMessage. Its one finding is a Worker's, which takes
+      // no target origin.
+      // https://oxc.rs/docs/guide/usage/linter/rules/unicorn/require-post-message-target-origin.html
+      "unicorn/require-post-message-target-origin": "off",
+
+      // The editor's stand-in for vscode-jsonrpc (examples/src/editor/no-rpc.ts) must export the
+      // class that ts-content-mapper constructs.
+      // https://oxc.rs/docs/guide/usage/linter/rules/typescript/no-extraneous-class.html
+      "typescript/no-extraneous-class": "off",
     },
+    overrides: [
+      {
+        // src/ is the published library, and fixing these changes the JavaScript in dist/. They wait
+        // for a release, which can ship that change: no-shape-in-symbol-names 16 (exported names),
+        // no-known-value-widening 12, no-runtime-typeof 3, no-array-sort 2, no-array-reverse 1,
+        // no-misused-spread 1.
+        files: ["src/**"],
+        rules: {
+          "anti-slop/no-shape-in-symbol-names": "off",
+          "anti-slop/no-known-value-widening": "off",
+          "anti-slop/no-runtime-typeof": "off",
+          "unicorn/no-array-sort": "off",
+          "unicorn/no-array-reverse": "off",
+          "typescript/no-misused-spread": "off",
+        },
+      },
+    ],
     options: {
       typeAware: true,
       typeCheck: true,

@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process";
+import { spawn } from "node:child_process";
 
 const root = new URL("..", import.meta.url).pathname;
 
@@ -16,33 +16,30 @@ export function fixture(name: string): string {
 }
 
 /** Runs the compiler with permission to start content mappers, from inside the project. */
-export function typeCheck(
-  compiler: Compiler,
-  project: string,
-  env: Record<string, string> = {},
-): Promise<{ code: number; output: string }> {
-  return new Promise((resolve, reject) => {
-    const options = { cwd: project, env: { ...process.env, ...env } };
-    execFile(
-      compilerPath(compiler),
-      ["--runExternalCode", "--pretty", "false"],
-      options,
-      (error, stdout, stderr) => {
-        // A compiler that didn't start or was killed has no exit code.
-        const code = error ? error.code : 0;
+export function typeCheck(compiler: Compiler, project: string, env: Record<string, string> = {}) {
+  return new Promise<{ code: number; output: string }>((resolve, reject) => {
+    const child = spawn(compilerPath(compiler), ["--runExternalCode", "--pretty", "false"], {
+      cwd: project,
+      env: { ...process.env, ...env },
+    });
 
-        if (typeof code === "number") resolve({ code, output: stdout + stderr });
-        else reject(error);
-      },
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.setEncoding("utf8").on("data", (chunk: string) => (stdout += chunk));
+    child.stderr.setEncoding("utf8").on("data", (chunk: string) => (stderr += chunk));
+    child.on("error", reject);
+    // A compiler that was killed has no exit code.
+    child.on("close", (code, signal) =>
+      code === null
+        ? reject(new Error(`${compiler} ended on ${signal}`))
+        : resolve({ code, output: stdout + stderr }),
     );
   });
 }
 
 /** One-based line and column of the first occurrence of `marker`. */
-export function positionOf(
-  text: string,
-  marker: string,
-): { line: number; column: number; offset: number } {
+export function positionOf(text: string, marker: string) {
   const offset = text.indexOf(marker);
 
   if (offset === -1) throw new Error(`Missing marker: ${marker}`);
