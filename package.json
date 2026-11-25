@@ -2,27 +2,27 @@
   "name": "interstage",
   "version": "0.1.0",
   "description": "Import WGSL into TypeScript as typed TypeGPU modules. A TypeScript 7.1 content mapper and a Vite plugin.",
+  "keywords": [
+    "content-mapper",
+    "shader",
+    "typegpu",
+    "typescript",
+    "vite-plugin",
+    "webgpu",
+    "wgsl"
+  ],
+  "homepage": "https://interstage.schnau.dev",
   "license": "MIT",
   "author": "Hauke Schnau",
-  "homepage": "https://interstage.schnau.dev",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/HaukeSchnau/interstage.git"
   },
-  "keywords": [
-    "wgsl",
-    "webgpu",
-    "typegpu",
-    "typescript",
-    "content-mapper",
-    "vite-plugin",
-    "shader"
+  "files": [
+    "dist"
   ],
   "type": "module",
   "sideEffects": false,
-  "engines": {
-    "node": ">=22.18"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -38,17 +38,6 @@
     },
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist"
-  ],
-  "typescript": {
-    "contentMapper": {
-      "exec": [
-        "node",
-        "dist/mapper.js"
-      ]
-    }
-  },
   "scripts": {
     "build": "tsrs -p tsconfig.build.json",
     "check": "vp check",
@@ -58,6 +47,18 @@
   },
   "dependencies": {
     "ts-content-mapper": "^0.1.0"
+  },
+  "devDependencies": {
+    "@oxlint/plugins": "1.94.0",
+    "@schnau/tsconfig": "^0.1.0",
+    "@types/node": "^26.1.1",
+    "interstage": "link:.",
+    "tsrs": "catalog:",
+    "typegpu": "0.12.8",
+    "typescript": "7.1.0-beta",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "webgpu": "^0.6.2"
   },
   "peerDependencies": {
     "typegpu": "^0.12.8",
@@ -72,17 +73,16 @@
       "optional": true
     }
   },
-  "devDependencies": {
-    "@oxlint/plugins": "1.94.0",
-    "@schnau/tsconfig": "^0.1.0",
-    "@types/node": "^26.1.1",
-    "interstage": "link:.",
-    "tsrs": "catalog:",
-    "typegpu": "0.12.8",
-    "typescript": "7.1.0-beta",
-    "vite": "catalog:",
-    "vite-plus": "catalog:",
-    "webgpu": "^0.6.2"
+  "typescript": {
+    "contentMapper": {
+      "exec": [
+        "node",
+        "dist/mapper.js"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">=22.18"
   },
   "packageManager": "pnpm@12.9.0"
 }

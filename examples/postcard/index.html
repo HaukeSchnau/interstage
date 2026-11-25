@@ -23,7 +23,8 @@
           </label>
           <label class="field message">
             <span>Message</span>
-            <textarea name="message" rows="4" spellcheck="false">The water here is so clear you can read through it. Try typing while it ripples.</textarea>
+            <textarea name="message" rows="4" spellcheck="false">
+The water here is so clear you can read through it. Try typing while it ripples.</textarea>
           </label>
           <fieldset class="stamps">
             <legend>Stamp</legend>
@@ -32,8 +33,13 @@
             <label><input type="radio" name="stamp" value="🌌" /> 🌌 Night</label>
           </fieldset>
           <div class="row">
-            <label class="toggle"><input type="checkbox" name="airmail" checked /> <span>Airmail</span></label>
-            <label class="postage"><span>Postage</span> <input type="range" name="postage" min="1" max="5" value="3" /> <output id="postage-value">€3</output></label>
+            <label class="toggle"
+              ><input type="checkbox" name="airmail" checked /> <span>Airmail</span></label
+            >
+            <label class="postage"
+              ><span>Postage</span> <input type="range" name="postage" min="1" max="5" value="3" />
+              <output id="postage-value">€3</output></label
+            >
           </div>
           <footer>
             <p class="postmark">Postmarked <time id="clock">--:--:--</time></p>
@@ -43,7 +49,10 @@
         <section id="sent" hidden>
           <p class="sent-mark">Sent</p>
           <h1>On its way to <span id="sent-to">Hauke</span></h1>
-          <p>The postcard you wrote flew away as dust, and this receipt came back from it. Every speck carried a piece of the live page.</p>
+          <p>
+            The postcard you wrote flew away as dust, and this receipt came back from it. Every
+            speck carried a piece of the live page.
+          </p>
           <button type="button" id="again">Write another</button>
         </section>
       </article>
@@ -51,12 +60,13 @@
 
     <section class="panel" aria-label="Controls">
       <p>
-        A real HTML form, drawn into a WebGPU texture by Chrome's experimental HTML-in-Canvas API whenever it repaints, then
-        bent by TypeGPU shaders. It stays a form. Type, pick a stamp, press Send.
+        A real HTML form, drawn into a WebGPU texture by Chrome's experimental HTML-in-Canvas API
+        whenever it repaints, then bent by TypeGPU shaders. It stays a form. Type, pick a stamp,
+        press Send.
       </p>
       <p>
-        interstage's part is small. The six shaders are <code>.wgsl</code> files, and their structs and bind group layouts
-        reach TypeScript as types.
+        interstage's part is small. The six shaders are <code>.wgsl</code> files, and their structs
+        and bind group layouts reach TypeScript as types.
       </p>
       <div class="actions" aria-label="Effect">
         <button type="button" data-mode="water" aria-pressed="true">Water</button>
@@ -70,8 +80,9 @@
       <h2>This demo needs HTML-in-Canvas</h2>
       <p id="unsupported-reason"></p>
       <p>
-        In Chrome or another Chromium browser, turn on <code>chrome://flags/#canvas-draw-element</code>, then relaunch. Here
-        is the card as plain HTML in the meantime.
+        In Chrome or another Chromium browser, turn on
+        <code>chrome://flags/#canvas-draw-element</code>, then relaunch. Here is the card as plain
+        HTML in the meantime.
       </p>
     </div>
 

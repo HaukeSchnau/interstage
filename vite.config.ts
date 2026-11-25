@@ -16,7 +16,13 @@ const agentTooling = [
   ".windsurf/**",
 ];
 
-const generated = ["dist", "examples/dist", "examples/.contract", "examples/.alchemy", "pnpm-lock.yaml"];
+const generated = [
+  "dist",
+  "examples/dist",
+  "examples/.contract",
+  "examples/.alchemy",
+  "pnpm-lock.yaml",
+];
 
 // Projects as interstage's users write them, which the tests compile. Their markers and expected
 // positions follow the text as it is.

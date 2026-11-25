@@ -4,6 +4,8 @@
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "types": ["node", "vite-plus/client"]
   },
-  "contentMappers": [{ "package": "interstage", "extensions": [".wgsl"], "options": { "validate": true } }],
+  "contentMappers": [
+    { "package": "interstage", "extensions": [".wgsl"], "options": { "validate": true } }
+  ],
   "include": ["src", "scripts", "vite.config.ts", "alchemy.run.ts"]
 }

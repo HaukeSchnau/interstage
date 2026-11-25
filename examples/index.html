@@ -4,7 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>interstage: TypeScript types for WGSL files</title>
-    <meta name="description" content="A TypeScript 7.1 content mapper that declares each .wgsl file as the TypeGPU module it becomes, so tsc checks the code that uses it." />
+    <meta
+      name="description"
+      content="A TypeScript 7.1 content mapper that declares each .wgsl file as the TypeGPU module it becomes, so tsc checks the code that uses it."
+    />
   </head>
   <body class="home">
     <header class="intro">
@@ -12,8 +15,8 @@
         <h1 class="wordmark">interstage</h1>
         <p class="lede">
           interstage lets <code>tsc</code> and your editor read a <code>.wgsl</code> file as the
-          <a href="https://typegpu.com">TypeGPU</a> module it becomes. It is a TypeScript 7.1 content mapper and a 30-line
-          Vite plugin, about 2,000 lines in all.
+          <a href="https://typegpu.com">TypeGPU</a> module it becomes. It is a TypeScript 7.1
+          content mapper and a 30-line Vite plugin, about 2,000 lines in all.
         </p>
         <p class="links">
           <a href="https://www.npmjs.com/package/interstage">npm</a>
@@ -23,9 +26,9 @@
         </p>
       </div>
       <p class="scope">
-        It only translates the shader's declarations into TypeGPU calls. TypeGPU builds and runs the pipelines, the shaders
-        stay plain WGSL, and the optional shader check is Tint's. Content mappers are new in a TypeScript beta, so treat this
-        as an experiment.
+        It only translates the shader's declarations into TypeGPU calls. TypeGPU builds and runs the
+        pipelines, the shaders stay plain WGSL, and the optional shader check is Tint's. Content
+        mappers are new in a TypeScript beta, so treat this as an experiment.
       </p>
     </header>
 
@@ -35,8 +38,8 @@
           <div>
             <h2 id="workbench-title">Edit the shader</h2>
             <p class="section-note">
-              A real <code>lamp.wgsl</code> and the <code>main.ts</code> that draws it. Change the shader and watch what tsc
-              reads, the errors in main.ts and the lamp follow.
+              A real <code>lamp.wgsl</code> and the <code>main.ts</code> that draws it. Change the
+              shader and watch what tsc reads, the errors in main.ts and the lamp follow.
             </p>
           </div>
           <div class="try" role="group" aria-label="Edits to try">
@@ -51,14 +54,40 @@
         <div class="bench">
           <div class="group shader-group">
             <div class="tabs" role="tablist" aria-label="Shader">
-              <button type="button" role="tab" id="tab-shader" aria-selected="true" aria-controls="shader-editor" data-language="wgsl">lamp.wgsl</button>
-              <button type="button" role="tab" id="tab-module" aria-selected="false" aria-controls="module-view" data-language="ts">what tsc reads</button>
+              <button
+                type="button"
+                role="tab"
+                id="tab-shader"
+                aria-selected="true"
+                aria-controls="shader-editor"
+                data-language="wgsl"
+              >
+                lamp.wgsl
+              </button>
+              <button
+                type="button"
+                role="tab"
+                id="tab-module"
+                aria-selected="false"
+                aria-controls="module-view"
+                data-language="ts"
+              >
+                what tsc reads
+              </button>
             </div>
             <div class="pane" id="shader-editor" role="tabpanel" aria-labelledby="tab-shader"></div>
-            <div class="pane" id="module-view" role="tabpanel" aria-labelledby="tab-module" hidden></div>
+            <div
+              class="pane"
+              id="module-view"
+              role="tabpanel"
+              aria-labelledby="tab-module"
+              hidden
+            ></div>
           </div>
           <div class="group main-group">
-            <div class="tabs"><span class="tab" id="tab-main" data-language="ts">main.ts</span></div>
+            <div class="tabs">
+              <span class="tab" id="tab-main" data-language="ts">main.ts</span>
+            </div>
             <div class="pane" id="main-editor"></div>
           </div>
           <div class="problems">
@@ -70,16 +99,19 @@
             <ul id="problem-list" aria-live="polite"></ul>
           </div>
           <figure class="lamp">
-            <div class="lamp-view"><canvas id="lamp" aria-label="The lava lamp that the code draws"></canvas></div>
+            <div class="lamp-view">
+              <canvas id="lamp" aria-label="The lava lamp that the code draws"></canvas>
+            </div>
             <figcaption id="lamp-status">Starting the preview…</figcaption>
           </figure>
         </div>
 
         <p class="workbench-note">
-          All of it runs in your browser. interstage's compiler writes "what tsc reads" on every keystroke, your browser's WGSL
-          compiler checks the shader, TypeScript checks main.ts in a worker, and TypeGPU draws the lamp. That TypeScript is
-          version 6, the last one written in JavaScript; in a project, tsc 7 gets the same module from the content mapper.
-          Hover a name to see its type, and Ctrl- or Cmd-click one in main.ts to jump to where it is declared.
+          All of it runs in your browser. interstage's compiler writes "what tsc reads" on every
+          keystroke, your browser's WGSL compiler checks the shader, TypeScript checks main.ts in a
+          worker, and TypeGPU draws the lamp. That TypeScript is version 6, the last one written in
+          JavaScript; in a project, tsc 7 gets the same module from the content mapper. Hover a name
+          to see its type, and Ctrl- or Cmd-click one in main.ts to jump to where it is declared.
         </p>
       </section>
 
@@ -87,13 +119,22 @@
         <h2 id="diagnostics-title">What tsc tells you</h2>
         <p class="section-note">Real output from building the demos below.</p>
         <figure>
-          <figcaption>With the <code>validate</code> option, Tint, the WGSL compiler inside Chrome, checks every shader during the type check. One of the first drafts of the slime mold used a reserved word:</figcaption>
-          <pre class="terminal">$ tsc --noEmit --runExternalCode
+          <figcaption>
+            With the <code>validate</code> option, Tint, the WGSL compiler inside Chrome, checks
+            every shader during the type check. One of the first drafts of the slime mold used a
+            reserved word:
+          </figcaption>
+          <pre class="terminal">
+$ tsc --noEmit --runExternalCode
 src/slime/slime.wgsl(116,9): error wgsl100: 'target' is a reserved keyword</pre>
         </figure>
         <figure>
-          <figcaption>Changing <code>speed: f32</code> to <code>speed: vec2f</code> in <code>slime.wgsl</code> breaks the TypeScript that writes it:</figcaption>
-          <pre class="terminal">$ tsc --noEmit --runExternalCode
+          <figcaption>
+            Changing <code>speed: f32</code> to <code>speed: vec2f</code> in
+            <code>slime.wgsl</code> breaks the TypeScript that writes it:
+          </figcaption>
+          <pre class="terminal">
+$ tsc --noEmit --runExternalCode
 src/slime/main.ts(40,66): error TS2345: Argument of type '{ decay: number; sensorAngle: number;
   sensorDistance: number; speciesCount: number; speed: number; turnSpeed: number; }' is not
   assignable to parameter of type 'Behaviour'.
@@ -106,12 +147,19 @@ src/slime/main.ts(40,66): error TS2345: Argument of type '{ decay: number; senso
         <h2 id="setup-title">Set it up</h2>
         <ol>
           <li>
-            <p>Install interstage next to TypeScript 7.1 and TypeGPU. <a href="https://github.com/oxc-project/tsrs">tsrs</a>, the Rust port of TypeScript 7.1, works in its place.</p>
+            <p>
+              Install interstage next to TypeScript 7.1 and TypeGPU.
+              <a href="https://github.com/oxc-project/tsrs">tsrs</a>, the Rust port of TypeScript
+              7.1, works in its place.
+            </p>
             <pre class="code"><code>pnpm add -D interstage typescript@beta
 pnpm add typegpu</code></pre>
           </li>
           <li>
-            <p>Register the content mapper in <code>tsconfig.json</code>. <code>validate</code> is optional and needs the <code>webgpu</code> package (<code>pnpm add -D webgpu</code>).</p>
+            <p>
+              Register the content mapper in <code>tsconfig.json</code>. <code>validate</code> is
+              optional and needs the <code>webgpu</code> package (<code>pnpm add -D webgpu</code>).
+            </p>
             <pre class="code"><code>{
   "compilerOptions": { "skipLibCheck": true },
   "contentMappers": [
@@ -126,7 +174,11 @@ pnpm add typegpu</code></pre>
 export default defineConfig({ plugins: [interstage()] })</code></pre>
           </li>
           <li>
-            <p>Type-check with permission to run the mapper. <code>tsrs</code> takes the same flags. In VS Code, the TypeScript 7 extension does the same in trusted workspaces, on either compiler.</p>
+            <p>
+              Type-check with permission to run the mapper. <code>tsrs</code> takes the same flags.
+              In VS Code, the TypeScript 7 extension does the same in trusted workspaces, on either
+              compiler.
+            </p>
             <pre class="code"><code>tsc --noEmit --runExternalCode</code></pre>
           </li>
         </ol>
@@ -134,63 +186,129 @@ export default defineConfig({ plugins: [interstage()] })</code></pre>
       <section class="limits" aria-labelledby="limits-title">
         <h2 id="limits-title">Limits</h2>
         <ul>
-          <li>WGSL files can't import each other. A struct that two shaders share is written in both.</li>
+          <li>
+            WGSL files can't import each other. A struct that two shaders share is written in both.
+          </li>
           <li><code>override</code> declarations aren't supported. Use <code>const</code>.</li>
-          <li>A runtime-sized array works as a whole storage binding, not as the last member of a struct.</li>
-          <li>TypeGPU has only square <code>f32</code> matrices, so interstage reports <code>mat2x3f</code> and <code>f16</code> matrices.</li>
-          <li>Content mappers arrived in TypeScript 7.1, which is in beta, and their protocol may still change.</li>
+          <li>
+            A runtime-sized array works as a whole storage binding, not as the last member of a
+            struct.
+          </li>
+          <li>
+            TypeGPU has only square <code>f32</code> matrices, so interstage reports
+            <code>mat2x3f</code> and <code>f16</code> matrices.
+          </li>
+          <li>
+            Content mappers arrived in TypeScript 7.1, which is in beta, and their protocol may
+            still change.
+          </li>
         </ul>
       </section>
 
       <section class="demos" id="demos" aria-labelledby="demos-title">
         <h2 id="demos-title">Demos</h2>
         <p class="section-note">
-          These are TypeGPU demos. Each one imports its shaders as <code>.wgsl</code> files through interstage, and that import
-          is all interstage does in them. The simulations, the rendering and the input handling are TypeGPU and browser code,
-          which the drawer on each demo shows next to the shaders.
+          These are TypeGPU demos. Each one imports its shaders as <code>.wgsl</code> files through
+          interstage, and that import is all interstage does in them. The simulations, the rendering
+          and the input handling are TypeGPU and browser code, which the drawer on each demo shows
+          next to the shaders.
         </p>
         <ul class="demo-list">
           <li class="demo-row">
-            <a href="slime/"><img src="posters/slime.webp" alt="Three colors of slime mold trails branching out from a central bloom" width="960" height="540" loading="lazy" /></a>
+            <a href="slime/"
+              ><img
+                src="posters/slime.webp"
+                alt="Three colors of slime mold trails branching out from a central bloom"
+                width="960"
+                height="540"
+                loading="lazy"
+            /></a>
             <div>
               <h3><a href="slime/">Slime</a></h3>
-              <p>Hundreds of thousands of agents lay and follow trails in three competing species.</p>
-              <p class="shows">interstage declares the shader's <code>Params</code> struct, so the sliders can only write fields it has.</p>
+              <p>
+                Hundreds of thousands of agents lay and follow trails in three competing species.
+              </p>
+              <p class="shows">
+                interstage declares the shader's <code>Params</code> struct, so the sliders can only
+                write fields it has.
+              </p>
             </div>
           </li>
           <li class="demo-row">
-            <a href="ink/"><img src="posters/ink.webp" alt="Bright plumes of ink swirling in dark water" width="960" height="540" loading="lazy" /></a>
+            <a href="ink/"
+              ><img
+                src="posters/ink.webp"
+                alt="Bright plumes of ink swirling in dark water"
+                width="960"
+                height="540"
+                loading="lazy"
+            /></a>
             <div>
               <h3><a href="ink/">Ink</a></h3>
               <p>Stable fluids with vorticity confinement. Drag through the water to stir it.</p>
-              <p class="shows">Nine passes share one bind group layout. interstage writes it from the shader's <code>@group(1)</code>, and TypeGPU's types check each buffer bound to it.</p>
+              <p class="shows">
+                Nine passes share one bind group layout. interstage writes it from the shader's
+                <code>@group(1)</code>, and TypeGPU's types check each buffer bound to it.
+              </p>
             </div>
           </li>
           <li class="demo-row">
-            <a href="sculpture/"><img src="posters/sculpture.webp" alt="An iridescent sphere carved into a lattice, with three drops melting into it" width="960" height="540" loading="lazy" /></a>
+            <a href="sculpture/"
+              ><img
+                src="posters/sculpture.webp"
+                alt="An iridescent sphere carved into a lattice, with three drops melting into it"
+                width="960"
+                height="540"
+                loading="lazy"
+            /></a>
             <div>
               <h3><a href="sculpture/">Sculpture</a></h3>
               <p>A gyroid lattice and three orbiting drops, raymarched with soft shadows.</p>
-              <p class="shows">One fragment shader with one uniform struct, <code>Scene</code>, which TypeScript fills in by field name.</p>
+              <p class="shows">
+                One fragment shader with one uniform struct, <code>Scene</code>, which TypeScript
+                fills in by field name.
+              </p>
             </div>
           </li>
           <li class="demo-row">
-            <a href="atlas/"><img src="posters/atlas.webp" alt="A topographic map of an island with contour lines and snowy highlands" width="960" height="540" loading="lazy" /></a>
+            <a href="atlas/"
+              ><img
+                src="posters/atlas.webp"
+                alt="A topographic map of an island with contour lines and snowy highlands"
+                width="960"
+                height="540"
+                loading="lazy"
+            /></a>
             <div>
               <h3><a href="atlas/">Atlas</a></h3>
               <p>An endless topographic map. Drag to travel, scroll to zoom.</p>
-              <p class="shows">The map is a TypeGPU shader written in TypeScript. It calls <code>elevation()</code> from <code>atlas.wgsl</code>, with the argument types interstage declares.</p>
+              <p class="shows">
+                The map is a TypeGPU shader written in TypeScript. It calls
+                <code>elevation()</code> from <code>atlas.wgsl</code>, with the argument types
+                interstage declares.
+              </p>
             </div>
           </li>
           <li class="demo-row">
-            <a href="postcard/"><img src="posters/postcard.webp" alt="A postcard form hanging like cloth, one corner pulled down to show its back" width="960" height="540" loading="lazy" /></a>
+            <a href="postcard/"
+              ><img
+                src="posters/postcard.webp"
+                alt="A postcard form hanging like cloth, one corner pulled down to show its back"
+                width="960"
+                height="540"
+                loading="lazy"
+            /></a>
             <div>
               <h3><a href="postcard/">Postcard</a></h3>
               <p>
-                A working HTML form, drawn into a WebGPU texture with Chrome's experimental HTML-in-Canvas API, then rippled, hung
-                as cloth or blown away as dust. It needs a Chrome flag, which the page names.
+                A working HTML form, drawn into a WebGPU texture with Chrome's experimental
+                HTML-in-Canvas API, then rippled, hung as cloth or blown away as dust. It needs a
+                Chrome flag, which the page names.
               </p>
-              <p class="shows">Six small shaders, each a <code>.wgsl</code> file typed by interstage. The clever part is Chrome's, which keeps the drawn form clickable.</p>
+              <p class="shows">
+                Six small shaders, each a <code>.wgsl</code> file typed by interstage. The clever
+                part is Chrome's, which keeps the drawn form clickable.
+              </p>
             </div>
           </li>
         </ul>
@@ -199,8 +317,9 @@ export default defineConfig({ plugins: [interstage()] })</code></pre>
 
     <footer>
       <p>
-        interstage is open source under the MIT license. <a href="https://github.com/HaukeSchnau/interstage">Read the source</a>.
-        The demos run on <a href="https://typegpu.com">TypeGPU</a>, by Software Mansion.
+        interstage is open source under the MIT license.
+        <a href="https://github.com/HaukeSchnau/interstage">Read the source</a>. The demos run on
+        <a href="https://typegpu.com">TypeGPU</a>, by Software Mansion.
       </p>
     </footer>
     <script type="module" src="./src/index.ts"></script>
