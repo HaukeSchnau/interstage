@@ -19,15 +19,20 @@ fn fall(@builtin(global_invocation_id) id: vec3u) {
 ```
 
 ```ts
-import { d, tgpu } from 'typegpu'
-import { Params, layout0, fall } from './particles.wgsl'
+import { d, tgpu } from "typegpu";
+import { Params, layout0, fall } from "./particles.wgsl";
 
-const root = await tgpu.init()
-const params = root.createBuffer(Params, { dt: 1 / 60, gravity: d.vec2f(0, -9.8) }).$usage('uniform')
-const velocities = root.createBuffer(d.arrayOf(d.vec2f, 1024)).$usage('storage')
-const bindGroup = root.createBindGroup(layout0, { params, velocities })
+const root = await tgpu.init();
+const params = root
+  .createBuffer(Params, { dt: 1 / 60, gravity: d.vec2f(0, -9.8) })
+  .$usage("uniform");
+const velocities = root.createBuffer(d.arrayOf(d.vec2f, 1024)).$usage("storage");
+const bindGroup = root.createBindGroup(layout0, { params, velocities });
 
-root.createComputePipeline({ compute: fall }).with(bindGroup).dispatchWorkgroups(1024 / 64)
+root
+  .createComputePipeline({ compute: fall })
+  .with(bindGroup)
+  .dispatchWorkgroups(1024 / 64);
 ```
 
 interstage is a [TypeScript 7.1 content mapper](https://github.com/microsoft/typescript-go/pull/4712) and a Vite plugin. The mapper shows `tsc` and your editor each `.wgsl` file as the TypeGPU module it becomes: structs turn into schemas, each `@group` into a bind group layout, functions into typed functions and entry points into pipeline stages. The Vite plugin serves the same module at runtime. Nothing is generated on disk, so nothing can drift out of sync with the shader.
@@ -72,7 +77,9 @@ In the editor, the TypeScript language server goes to the WGSL declaration of an
    ```jsonc
    {
      "compilerOptions": { "skipLibCheck": true },
-     "contentMappers": [{ "package": "interstage", "extensions": [".wgsl"], "options": { "validate": true } }],
+     "contentMappers": [
+       { "package": "interstage", "extensions": [".wgsl"], "options": { "validate": true } },
+     ],
    }
    ```
 
@@ -81,9 +88,9 @@ In the editor, the TypeScript language server goes to the WGSL declaration of an
 3. Load `.wgsl` files as modules in Vite:
 
    ```ts
-   import interstage from 'interstage/vite'
+   import interstage from "interstage/vite";
 
-   export default defineConfig({ plugins: [interstage()] })
+   export default defineConfig({ plugins: [interstage()] });
    ```
 
    To import shaders in Node, for TypeGPU on Dawn, run `node --import interstage/register`.
@@ -98,15 +105,15 @@ In the editor, the TypeScript language server goes to the WGSL declaration of an
 
 ## How a shader becomes a module
 
-| WGSL | Export | TypeGPU |
-| --- | --- | --- |
-| `struct Particle { … }` | `Particle` | `d.struct({ … })`, with `@align`, `@size`, `@location`, `@interpolate` and `@builtin` as decorators |
-| `alias Color = vec3f;` | `Color` | the aliased schema |
-| `const COUNT = 4096;` | `COUNT` | a JavaScript value: `4096` with the literal type `4096`, a `d.vec3f`, an array or an object |
-| `@group(1) @binding(0) var<storage, read_write> particles: array<Particle>;` | `layout1` | `tgpu.bindGroupLayout({ particles: { storage: d.arrayOf(Particle), access: 'mutable' } }).$idx(1)` |
-| `var<workgroup> tile: array<f32, 64>;` | `tile` | `tgpu.workgroupVar(…)`, and `tgpu.privateVar` for `var<private>` |
-| `fn wrap(p: vec2f) -> vec2f { … }` | `wrap` | `tgpu.fn([d.vec2f], d.vec2f)`, callable from TypeScript shaders |
-| `@compute @workgroup_size(64) fn step(…)` | `step` | `tgpu.computeFn`, and `tgpu.vertexFn` and `tgpu.fragmentFn` for the other stages |
+| WGSL                                                                         | Export     | TypeGPU                                                                                             |
+| ---------------------------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------- |
+| `struct Particle { … }`                                                      | `Particle` | `d.struct({ … })`, with `@align`, `@size`, `@location`, `@interpolate` and `@builtin` as decorators |
+| `alias Color = vec3f;`                                                       | `Color`    | the aliased schema                                                                                  |
+| `const COUNT = 4096;`                                                        | `COUNT`    | a JavaScript value: `4096` with the literal type `4096`, a `d.vec3f`, an array or an object         |
+| `@group(1) @binding(0) var<storage, read_write> particles: array<Particle>;` | `layout1`  | `tgpu.bindGroupLayout({ particles: { storage: d.arrayOf(Particle), access: 'mutable' } }).$idx(1)`  |
+| `var<workgroup> tile: array<f32, 64>;`                                       | `tile`     | `tgpu.workgroupVar(…)`, and `tgpu.privateVar` for `var<private>`                                    |
+| `fn wrap(p: vec2f) -> vec2f { … }`                                           | `wrap`     | `tgpu.fn([d.vec2f], d.vec2f)`, callable from TypeScript shaders                                     |
+| `@compute @workgroup_size(64) fn step(…)`                                    | `step`     | `tgpu.computeFn`, and `tgpu.vertexFn` and `tgpu.fragmentFn` for the other stages                    |
 
 Constants are values on the CPU side, so `dispatchWorkgroups(COUNT / WORKGROUP)` reads them straight from the shader. Inside the shader, an untyped constant stays abstract, as WGSL defines it, and a typed one becomes a `const` declaration.
 
@@ -137,12 +144,13 @@ pnpm --dir examples dev
 
 ```sh
 pnpm install
-pnpm test                     # builds, then runs the tests in test/
+pnpm check                    # builds, then vp check: format, lint and type check
+pnpm test                     # vp test run: builds, then runs the tests in test/
 pnpm --dir examples typecheck
 pnpm --dir examples build && pnpm --dir examples check
 ```
 
-The tests type-check the fixtures and drive the language server under both `tsc` and `tsrs`. They compile shaders with Tint and run them on Dawn, so they need a WebGPU adapter, like the `validate` option. The repository builds and type-checks itself with tsrs. `examples/check` loads every demo in Chromium (set `CHROME` to its path) and fails on WebGPU errors or blank frames. It also renames a field in the home page's editor and waits for TypeScript to report it, and it turns on Chromium's HTML-in-Canvas flags for the postcard and sends it once. `nix develop` gives a shell with Node, pnpm, Chromium and Mesa's software Vulkan driver, in which all of it runs without a GPU.
+The tests type-check the fixtures and drive the language server under both `tsc` and `tsrs`. They compile shaders with Tint and run them on Dawn, so they need a WebGPU adapter, like the `validate` option. The repository builds with tsrs, and `vp check` type-checks it with tsrs's linter, which starts content mappers when `TSRS_LINT_RUN_EXTERNAL_CODE=1` is set, as `nix develop` does. `examples/check` loads every demo in Chromium (set `CHROME` to its path) and fails on WebGPU errors or blank frames. It also renames a field in the home page's editor and waits for TypeScript to report it, and it turns on Chromium's HTML-in-Canvas flags for the postcard and sends it once. `nix develop` gives a shell with Node, pnpm, Chromium and Mesa's software Vulkan driver, in which all of it runs without a GPU.
 
 [Calder](https://calder.schnau.dev) runs these checks on every push and pull request (`.calder/ci.ts`). A pull request gets a preview of the examples, and `main` deploys them to interstage.schnau.dev. A commit that raises the version in `package.json` stages that version on npm, where a maintainer approves it with 2FA (`npm stage approve <id>`).
 

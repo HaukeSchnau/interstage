@@ -1,4 +1,4 @@
-@import '@fontsource-variable/recursive/full.css';
+@import "@fontsource-variable/recursive/full.css";
 
 :root {
   --void: #000000;
@@ -8,7 +8,7 @@
   --wgsl: #f2b134;
   --ts: #7fb6ff;
   --error: #ff7b6b;
-  --sans: 'Recursive Variable', system-ui, sans-serif;
+  --sans: "Recursive Variable", system-ui, sans-serif;
   --step--1: 0.8125rem;
   --step-0: 1rem;
   --step-1: 1.25rem;
@@ -27,7 +27,9 @@ html {
   background: var(--void);
   color: var(--chalk);
   font-family: var(--sans);
-  font-variation-settings: 'MONO' 0, 'CASL' 0;
+  font-variation-settings:
+    "MONO" 0,
+    "CASL" 0;
   font-size: 100%;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
@@ -55,7 +57,9 @@ a:hover {
 code,
 pre {
   font-family: var(--sans);
-  font-variation-settings: 'MONO' 1, 'CASL' 0;
+  font-variation-settings:
+    "MONO" 1,
+    "CASL" 0;
   font-size: 0.875em;
 }
 
@@ -96,7 +100,7 @@ pre {
 }
 
 .demo-header .home {
-  font-variation-settings: 'MONO' 1;
+  font-variation-settings: "MONO" 1;
   font-size: var(--step--1);
   color: var(--graphite);
   text-decoration: none;
@@ -133,7 +137,7 @@ button:hover {
   border-color: var(--graphite);
 }
 
-button[aria-pressed='true'] {
+button[aria-pressed="true"] {
   border-color: var(--chalk);
 }
 
@@ -170,12 +174,12 @@ button[aria-pressed='true'] {
 }
 
 .control output {
-  font-variation-settings: 'MONO' 1;
+  font-variation-settings: "MONO" 1;
   color: var(--graphite);
   font-variant-numeric: tabular-nums;
 }
 
-.control input[type='range'] {
+.control input[type="range"] {
   grid-column: 1 / -1;
   width: 100%;
   accent-color: var(--chalk);
@@ -230,7 +234,7 @@ button[aria-pressed='true'] {
   transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.contract[data-open='true'] {
+.contract[data-open="true"] {
   transform: none;
 }
 
@@ -266,15 +270,15 @@ button[aria-pressed='true'] {
 }
 
 .tabs button {
-  font-variation-settings: 'MONO' 1;
+  font-variation-settings: "MONO" 1;
 }
 
-.tabs button[data-language='wgsl'][aria-selected='true'] {
+.tabs button[data-language="wgsl"][aria-selected="true"] {
   border-color: var(--wgsl);
   color: var(--wgsl);
 }
 
-.tabs button[data-language='ts'][aria-selected='true'] {
+.tabs button[data-language="ts"][aria-selected="true"] {
   border-color: var(--ts);
   color: var(--ts);
 }
@@ -302,7 +306,9 @@ button[aria-pressed='true'] {
 
 .code .c {
   color: #6f6c66;
-  font-variation-settings: 'MONO' 1, 'CASL' 1;
+  font-variation-settings:
+    "MONO" 1,
+    "CASL" 1;
 }
 
 .code .s {
@@ -377,7 +383,9 @@ button[aria-pressed='true'] {
 
 @keyframes interpolate {
   from {
-    font-variation-settings: 'MONO' 1, 'CASL' 0;
+    font-variation-settings:
+      "MONO" 1,
+      "CASL" 0;
     letter-spacing: 0;
   }
 }
@@ -515,7 +523,7 @@ pre.terminal {
 
 .setup li::marker {
   color: var(--graphite);
-  font-variation-settings: 'MONO' 1;
+  font-variation-settings: "MONO" 1;
 }
 
 .setup li p {
@@ -595,8 +603,8 @@ main section.workbench {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(15rem, 0.55fr);
   grid-template-rows: var(--pane) auto;
   grid-template-areas:
-    'shader main lamp'
-    'problems problems lamp';
+    "shader main lamp"
+    "problems problems lamp";
   border: 1px solid var(--seam);
   border-radius: 14px;
   overflow: hidden;
@@ -642,27 +650,27 @@ main section.workbench {
   backdrop-filter: none;
   padding: 0.65rem 1rem 0.55rem;
   font-size: var(--step--1);
-  font-variation-settings: 'MONO' 1;
+  font-variation-settings: "MONO" 1;
   color: var(--graphite);
 }
 
 .bench .tabs .tab,
-.bench .tabs [aria-selected='true'] {
+.bench .tabs [aria-selected="true"] {
   color: var(--chalk);
 }
 
-.bench .tabs [data-language='wgsl'][aria-selected='true'] {
+.bench .tabs [data-language="wgsl"][aria-selected="true"] {
   border-bottom-color: var(--wgsl);
 }
 
-.bench .tabs [data-language='ts'][aria-selected='true'],
-.bench .tabs .tab[data-language='ts'] {
+.bench .tabs [data-language="ts"][aria-selected="true"],
+.bench .tabs .tab[data-language="ts"] {
   border-bottom-color: var(--ts);
 }
 
 .bench .tabs [data-changed]::after,
 .bench .tabs [data-problems]::after {
-  content: '';
+  content: "";
   display: inline-block;
   width: 0.4rem;
   height: 0.4rem;
@@ -712,7 +720,7 @@ main section.workbench {
 }
 
 .problems-head .count {
-  font-variation-settings: 'MONO' 1;
+  font-variation-settings: "MONO" 1;
   color: var(--graphite);
 }
 
@@ -737,7 +745,7 @@ main section.workbench {
   backdrop-filter: none;
   padding: 0.3rem 1rem;
   text-align: left;
-  font-variation-settings: 'MONO' 1;
+  font-variation-settings: "MONO" 1;
   line-height: 1.5;
 }
 
@@ -828,9 +836,9 @@ main section.workbench {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-rows: var(--pane) auto 20rem;
     grid-template-areas:
-      'shader main'
-      'problems problems'
-      'lamp lamp';
+      "shader main"
+      "problems problems"
+      "lamp lamp";
   }
 
   .lamp {
@@ -844,7 +852,7 @@ main section.workbench {
     --pane: 24rem;
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: var(--pane) 20rem auto 22rem;
-    grid-template-areas: 'shader' 'main' 'problems' 'lamp';
+    grid-template-areas: "shader" "main" "problems" "lamp";
   }
 
   .shader-group {

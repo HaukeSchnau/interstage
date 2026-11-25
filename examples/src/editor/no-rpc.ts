@@ -2,9 +2,12 @@
 // entry, which holds both MappedCodeBuilder, the part interstage's compiler uses, and the
 // stdin/stdout runner that imports this transport. A builder-only export in ts-content-mapper
 // would let this file go.
-export const ErrorCodes = {}
+export const ErrorCodes = {};
+
 export class RequestType {}
+
 export class ResponseError extends Error {}
+
 export function createMessageConnection(): never {
-  throw new Error('Content mappers run under tsc or tsrs, not in a browser.')
+  throw new Error("Content mappers run under tsc or tsrs, not in a browser.");
 }

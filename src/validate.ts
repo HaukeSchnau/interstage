@@ -1,6 +1,8 @@
-import { DiagnosticCode, type Diagnostic } from './compile.ts'
+import type * as WebGPU from "webgpu";
 
-export type Validator = (source: string) => Promise<Diagnostic[]>
+import { DiagnosticCode, type Diagnostic } from "./compile.ts";
+
+export type Validator = (source: string) => Promise<Diagnostic[]>;
 
 /**
  * Compiles shaders with Dawn, Chrome's WebGPU implementation, through the optional `webgpu`
@@ -8,35 +10,43 @@ export type Validator = (source: string) => Promise<Diagnostic[]>
  * uniformity and the rules of each shader stage.
  */
 export async function createValidator(): Promise<Validator> {
-  let webgpu: typeof import('webgpu')
+  let webgpu: typeof WebGPU;
+
   try {
-    webgpu = await import('webgpu')
+    webgpu = await import("webgpu");
   } catch {
-    throw new Error("Shader validation needs the 'webgpu' package; install it next to interstage")
+    throw new Error("Shader validation needs the 'webgpu' package; install it next to interstage");
   }
+
   // Dawn shuts down when the object `create` returns is garbage collected, so the validator
   // holds on to it.
-  const gpu = webgpu.create([])
-  const adapter = await gpu.requestAdapter()
+  const gpu = webgpu.create([]);
+  const adapter = await gpu.requestAdapter();
+
   if (!adapter) {
-    throw new Error('Shader validation found no WebGPU adapter. On Linux, Dawn needs a Vulkan driver, such as Mesa lavapipe named by VK_ICD_FILENAMES')
+    throw new Error(
+      "Shader validation found no WebGPU adapter. On Linux, Dawn needs a Vulkan driver, such as Mesa lavapipe named by VK_ICD_FILENAMES",
+    );
   }
+
   const device = await adapter.requestDevice({
-    requiredFeatures: adapter.features.has('shader-f16') ? ['shader-f16'] : [],
-  })
-  const dawn = { gpu, device }
+    requiredFeatures: adapter.features.has("shader-f16") ? ["shader-f16"] : [],
+  });
+
+  const dawn = { gpu, device };
 
   return async (source) => {
-    dawn.device.pushErrorScope('validation')
-    const module = dawn.device.createShaderModule({ code: source })
-    const [info] = await Promise.all([module.getCompilationInfo(), dawn.device.popErrorScope()])
+    dawn.device.pushErrorScope("validation");
+    const module = dawn.device.createShaderModule({ code: source });
+    const [info] = await Promise.all([module.getCompilationInfo(), dawn.device.popErrorScope()]);
+
     return info.messages
-      .filter((message) => message.type === 'error')
+      .filter((message) => message.type === "error")
       .map((message) => ({
         message: message.message,
         start: message.offset,
         end: message.offset + message.length,
         code: DiagnosticCode.Shader,
-      }))
-  }
+      }));
+  };
 }
