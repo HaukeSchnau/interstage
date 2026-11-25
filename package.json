@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@oxlint/plugins": "1.94.0",
-    "@schnau/tsconfig": "^0.1.0",
+    "@schnau/tsconfig": "^0.1.1",
     "@types/node": "^26.1.1",
     "interstage": "link:.",
     "tsrs": "catalog:",
