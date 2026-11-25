@@ -7,18 +7,20 @@ const shell = flake.devShells.ci;
 const install = Pnpm.install({ shell });
 
 /**
- * `vp check` (format, lint and the type check, which runs the content mapper over the tests' own
- * shaders) and the whole `vp test` suite, which compiles and runs shaders on Dawn in the shell's
- * software Vulkan driver.
+ * `vp check`: format, lint and the type check, which runs the content mapper over the tests' own
+ * shaders. The mapper is the built dist/mapper.js, and a task starts without dist/, so `pnpm check`
+ * builds first. Vp.check runs `vp check` alone.
  */
-const gate = Vp.tasks({ shell, setup: install });
+const check = Task.make("check", { shell, setup: install, run: cmd`pnpm check` });
+/** The whole `vp test` suite, which compiles and runs shaders on Dawn in the shell's software Vulkan driver. */
+const test = Vp.test({ shell, setup: install });
 /** Tint validates every example shader in the type check, and Chromium loads each demo from the build. */
 const examples = Task.make("examples", {
   shell,
   setup: install,
   run: cmd`bash -c ${"pnpm --dir examples typecheck && pnpm --dir examples build && pnpm --dir examples check"}`,
 }).pipe(Step.timeout("20 minutes"));
-const checks = [...gate, examples];
+const checks = [check, test, examples];
 
 /** The examples at interstage.schnau.dev (examples/alchemy.run.ts), with a preview per pull request. */
 const site = Project.alchemy({

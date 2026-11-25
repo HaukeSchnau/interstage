@@ -236,8 +236,11 @@ export async function capture(root: TgpuRoot, texture: GPUTexture): Promise<stri
   canvas.getContext("2d")!.putImageData(pixels, 0, 0);
   const blob = await canvas.convertToBlob({ type: "image/png" });
 
-  // scripts/check.ts loads it into an image on this page.
-  return URL.createObjectURL(blob);
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => resolve(reader.result as string));
+    reader.readAsDataURL(blob);
+  });
 }
 
 export function header(title: string): HTMLElement {

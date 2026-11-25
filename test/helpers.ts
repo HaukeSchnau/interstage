@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { execFile } from "node:child_process";
 
 const root = new URL("..", import.meta.url).pathname;
 
@@ -18,22 +18,20 @@ export function fixture(name: string): string {
 /** Runs the compiler with permission to start content mappers, from inside the project. */
 export function typeCheck(compiler: Compiler, project: string, env: Record<string, string> = {}) {
   return new Promise<{ code: number; output: string }>((resolve, reject) => {
-    const child = spawn(compilerPath(compiler), ["--runExternalCode", "--pretty", "false"], {
-      cwd: project,
-      env: { ...process.env, ...env },
-    });
+    const options = { cwd: project, env: { ...process.env, ...env } };
 
-    let stdout = "";
-    let stderr = "";
+    const child = execFile(
+      compilerPath(compiler),
+      ["--runExternalCode", "--pretty", "false"],
+      options,
+      (error, stdout, stderr) => {
+        // A compiler that was killed has no exit code. One that didn't start, or whose output
+        // overflowed execFile's buffer, fails with a code other than its exit code.
+        const code = child.exitCode;
 
-    child.stdout.setEncoding("utf8").on("data", (chunk: string) => (stdout += chunk));
-    child.stderr.setEncoding("utf8").on("data", (chunk: string) => (stderr += chunk));
-    child.on("error", reject);
-    // A compiler that was killed has no exit code.
-    child.on("close", (code, signal) =>
-      code === null
-        ? reject(new Error(`${compiler} ended on ${signal}`))
-        : resolve({ code, output: stdout + stderr }),
+        if (code === null || (error !== null && error.code !== code)) reject(error);
+        else resolve({ code, output: stdout + stderr });
+      },
     );
   });
 }

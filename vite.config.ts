@@ -80,46 +80,50 @@ export default defineConfig({
       // https://oxc.rs/docs/guide/usage/linter/rules/typescript/no-non-null-assertion.html
       "typescript/no-non-null-assertion": "off",
 
-      // `typescript/no-unsafe-type-assertion` already rejects narrowing casts, so a comment on a
-      // safe upcast adds friction without safety.
+      // It asks for a comment on every cast: 26 findings, 18 in src/, where tsrs copies comments into
+      // the published JavaScript. The casts that narrow are the ones no-unsafe-type-assertion lists
+      // below, with the reason they stay.
       // https://github.com/dmmulroy/anti-slop/blob/63dbb09/src/rules/require-safety-comment-for-type-assertion.ts
       "anti-slop/require-safety-comment-for-type-assertion": "off",
 
       // Sequential awaits are deliberate here: scripts/check.ts loads one demo at a time, and the
-      // editor's checker files are read in dependency order.
+      // editor's checker files are read in dependency order. 20 findings.
       // https://oxc.rs/docs/guide/usage/linter/rules/eslint/no-await-in-loop.html
       "eslint/no-await-in-loop": "off",
 
       // Reusing a precise name in a nested callback reads better, and TypeScript resolves the scopes.
+      // 6 findings.
       // https://oxc.rs/docs/guide/usage/linter/rules/eslint/no-shadow.html
       "eslint/no-shadow": "off",
 
       // A small helper beside its only caller reads better than one hoisted for a tiny allocation.
+      // 6 findings.
       // https://oxc.rs/docs/guide/usage/linter/rules/unicorn/consistent-function-scoping.html
       "unicorn/consistent-function-scoping": "off",
 
       // It misreads exhaustive switches over tagged unions; `noImplicitReturns` covers missing returns.
+      // 7 findings.
       // https://oxc.rs/docs/guide/usage/linter/rules/typescript/consistent-return.html
       "typescript/consistent-return": "off",
 
-      // Small immutable updates read better as spreads than as mutation.
+      // Small immutable updates read better as spreads than as mutation. 1 finding.
       // https://oxc.rs/docs/guide/usage/linter/rules/oxc/no-map-spread.html
       "oxc/no-map-spread": "off",
 
       // `window.__interstage` is the demos' hook for scripts/check.ts, named so that no page global
-      // can collide with it.
+      // can collide with it. 11 findings.
       // https://oxc.rs/docs/guide/usage/linter/rules/eslint/no-underscore-dangle.html
       "eslint/no-underscore-dangle": "off",
 
       // Each cast sits where TypeScript can't relate the types: the evaluator's Value union, which
-      // narrows by `ty` rather than by a tag (22 in src/), replies over postMessage and JSON-RPC, a
-      // method picked from a union of methods, Object.fromEntries over the controls' keys and
-      // server.address() (6 elsewhere). Removing them is a redesign of each.
+      // narrows by `ty` rather than by a tag (18 in src/), replies over postMessage and JSON-RPC, a
+      // method picked from a union of methods, Object.fromEntries over the controls' keys,
+      // FileReader's result and server.address() (7 elsewhere). Removing them is a redesign of each.
       // https://oxc.rs/docs/guide/usage/linter/rules/typescript/no-unsafe-type-assertion.html
       "typescript/no-unsafe-type-assertion": "off",
 
       // Error handlers and the replies of the two RPC clients (test/lsp.ts and the editor's
-      // checker worker) receive values whose type isn't known yet: 5 findings.
+      // checker worker) receive values whose type isn't known yet: 6 findings.
       // https://github.com/dmmulroy/anti-slop/blob/63dbb09/src/rules/no-unknown-parameters.ts
       "anti-slop/no-unknown-parameters": "off",
 
@@ -138,7 +142,7 @@ export default defineConfig({
       "unicorn/require-post-message-target-origin": "off",
 
       // The editor's stand-in for vscode-jsonrpc (examples/src/editor/no-rpc.ts) must export the
-      // class that ts-content-mapper constructs.
+      // class that ts-content-mapper constructs. 1 finding.
       // https://oxc.rs/docs/guide/usage/linter/rules/typescript/no-extraneous-class.html
       "typescript/no-extraneous-class": "off",
     },

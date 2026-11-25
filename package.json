@@ -40,7 +40,7 @@
   },
   "scripts": {
     "build": "tsrs -p tsconfig.build.json",
-    "check": "vp check",
+    "check": "pnpm build && vp check",
     "test": "vp test run",
     "prepare": "tsrs -p tsconfig.build.json",
     "prepack": "tsrs -p tsconfig.build.json"

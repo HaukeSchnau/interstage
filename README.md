@@ -144,7 +144,7 @@ pnpm --dir examples dev
 
 ```sh
 pnpm install
-pnpm check                    # vp check: format, lint and type check
+pnpm check                    # builds, then vp check: format, lint and type check
 pnpm test                     # vp test run: builds, then runs the tests in test/
 pnpm --dir examples typecheck
 pnpm --dir examples build && pnpm --dir examples check

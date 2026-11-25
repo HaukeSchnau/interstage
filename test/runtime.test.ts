@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { afterAll, test } from "vite-plus/test";
 import { d, tgpu } from "typegpu";
 import * as compute from "./fixtures/runtime/compute.wgsl";
@@ -77,4 +78,20 @@ test("a vertex builtin return reaches a fragment builtin parameter", async () =>
     255,
     255,
   ]);
+});
+
+test("Node's loader hook, interstage/register, gives the module that the Vite plugin gives", () => {
+  const script = [
+    'import { tgpu } from "typegpu";',
+    'import * as compute from "./test/fixtures/runtime/compute.wgsl";',
+    "process.stdout.write(tgpu.resolve([compute.main]));",
+  ].join("\n");
+
+  const output = execFileSync(
+    process.execPath,
+    ["--import", "interstage/register", "--input-type=module", "--eval", script],
+    { encoding: "utf8" },
+  );
+
+  assert.equal(output, tgpu.resolve([compute.main]));
 });
