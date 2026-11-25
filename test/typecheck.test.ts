@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { cpSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { describe, test } from 'node:test'
+import { describe, test } from 'vite-plus/test'
 import { compilers, fixture, positionOf, typeCheck, type Compiler } from './helpers.ts'
 
 for (const compiler of compilers) {

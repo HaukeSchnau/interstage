@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { after, test } from 'node:test'
+import { afterAll, test } from 'vite-plus/test'
 import { d, tgpu } from 'typegpu'
 import * as compute from './fixtures/runtime/compute.wgsl'
 import * as builtins from './fixtures/runtime/builtins.wgsl'
@@ -7,7 +7,7 @@ import * as structs from './fixtures/runtime/structs.wgsl'
 import * as particles from './fixtures/basic/src/particles.wgsl'
 import { compileErrors, gpu, renderPixels } from './gpu.ts'
 
-after(async () => (await gpu()).destroy())
+afterAll(async () => (await gpu()).destroy())
 
 test('every entry point resolves to WGSL that Tint accepts', async () => {
   const root = await gpu()

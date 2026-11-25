@@ -137,12 +137,13 @@ pnpm --dir examples dev
 
 ```sh
 pnpm install
-pnpm test                     # builds, then runs the tests in test/
+pnpm check                    # vp check: format, lint and type check
+pnpm test                     # vp test run: builds, then runs the tests in test/
 pnpm --dir examples typecheck
 pnpm --dir examples build && pnpm --dir examples check
 ```
 
-The tests type-check the fixtures and drive the language server under both `tsc` and `tsrs`. They compile shaders with Tint and run them on Dawn, so they need a WebGPU adapter, like the `validate` option. The repository builds and type-checks itself with tsrs. `examples/check` loads every demo in Chromium (set `CHROME` to its path) and fails on WebGPU errors or blank frames. It also renames a field in the home page's editor and waits for TypeScript to report it, and it turns on Chromium's HTML-in-Canvas flags for the postcard and sends it once. `nix develop` gives a shell with Node, pnpm, Chromium and Mesa's software Vulkan driver, in which all of it runs without a GPU.
+The tests type-check the fixtures and drive the language server under both `tsc` and `tsrs`. They compile shaders with Tint and run them on Dawn, so they need a WebGPU adapter, like the `validate` option. The repository builds with tsrs, and `vp check` type-checks it with tsrs's linter, which starts content mappers when `TSRS_LINT_RUN_EXTERNAL_CODE=1` is set, as `nix develop` does. `examples/check` loads every demo in Chromium (set `CHROME` to its path) and fails on WebGPU errors or blank frames. It also renames a field in the home page's editor and waits for TypeScript to report it, and it turns on Chromium's HTML-in-Canvas flags for the postcard and sends it once. `nix develop` gives a shell with Node, pnpm, Chromium and Mesa's software Vulkan driver, in which all of it runs without a GPU.
 
 [Calder](https://calder.schnau.dev) runs these checks on every push and pull request (`.calder/ci.ts`). A pull request gets a preview of the examples, and `main` deploys them to interstage.schnau.dev. A commit that raises the version in `package.json` stages that version on npm, where a maintainer approves it with 2FA (`npm stage approve <id>`).
 

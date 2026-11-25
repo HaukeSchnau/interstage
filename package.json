@@ -51,8 +51,8 @@
   },
   "scripts": {
     "build": "tsrs -p tsconfig.build.json",
-    "typecheck": "pnpm run build && tsrs --noEmit --runExternalCode",
-    "test": "pnpm run build && node --import ./src/register.ts --test 'test/*.test.ts'",
+    "check": "vp check",
+    "test": "vp test run",
     "prepare": "tsrs -p tsconfig.build.json",
     "prepack": "tsrs -p tsconfig.build.json"
   },
@@ -73,12 +73,16 @@
     }
   },
   "devDependencies": {
+    "@oxlint/plugins": "1.94.0",
+    "@schnau/tsconfig": "^0.1.0",
     "@types/node": "^26.1.1",
-    "tsrs": "^7.1.0-beta.tsrs5",
+    "interstage": "link:.",
+    "tsrs": "catalog:",
     "typegpu": "0.12.8",
     "typescript": "7.1.0-beta",
-    "vite": "^8.3.5",
-    "interstage": "link:.",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
     "webgpu": "^0.6.2"
-  }
+  },
+  "packageManager": "pnpm@12.9.0"
 }

@@ -1,22 +1,24 @@
 import { Calder, On, Step, Task, cmd } from "@calder-ci/core"
-import { Npm, Pnpm, Project } from "@calder-ci/std"
+import { Npm, Pnpm, Project, Vp } from "@calder-ci/std"
 import { Schema } from "effect"
 import { flake } from "./flake.ts"
 
 const shell = flake.devShells.ci
 const install = Pnpm.install({ shell })
 
-/** The repository's type check runs the content mapper over the tests' own shaders. */
-const typecheck = Task.make("typecheck", { shell, setup: install, run: cmd`pnpm typecheck` })
-/** The tests compile and run shaders on Dawn, in the shell's software Vulkan driver. */
-const test = Task.make("test", { shell, setup: install, run: cmd`pnpm test` }).pipe(Step.timeout("15 minutes"))
+/**
+ * `vp check` (format, lint and the type check, which runs the content mapper over the tests' own
+ * shaders) and the whole `vp test` suite, which compiles and runs shaders on Dawn in the shell's
+ * software Vulkan driver.
+ */
+const gate = Vp.tasks({ shell, setup: install })
 /** Tint validates every example shader in the type check, and Chromium loads each demo from the build. */
 const examples = Task.make("examples", {
   shell,
   setup: install,
   run: cmd`bash -c ${"pnpm --dir examples typecheck && pnpm --dir examples build && pnpm --dir examples check"}`,
 }).pipe(Step.timeout("20 minutes"))
-const checks = [typecheck, test, examples]
+const checks = [...gate, examples]
 
 /** The examples at interstage.schnau.dev (examples/alchemy.run.ts), with a preview per pull request. */
 const site = Project.alchemy({

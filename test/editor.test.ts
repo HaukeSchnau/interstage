@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { after, before, describe, test } from 'node:test'
+import { afterAll, beforeAll, describe, test } from 'vite-plus/test'
 import { compilers, fixture, positionOf } from './helpers.ts'
 import { languageServer, where } from './lsp.ts'
 
@@ -18,12 +18,12 @@ for (const compiler of compilers) {
   describe(compiler, () => {
     let server: Awaited<ReturnType<typeof languageServer>>
 
-    before(async () => {
+    beforeAll(async () => {
       server = await languageServer(compiler, project)
       server.open('src/main.ts')
       server.open('src/particles.wgsl')
     })
-    after(() => server.close())
+    afterAll(() => server.close())
 
     test('go to definition on an imported struct opens its WGSL declaration', async () => {
       assert.deepEqual(where(await server.definition('src/main.ts', 'Particle, layout0')), [at('src/particles.wgsl', 'struct Particle', 7)])

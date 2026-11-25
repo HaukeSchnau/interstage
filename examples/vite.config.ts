@@ -3,7 +3,7 @@ import { createRequire } from 'node:module'
 import { dirname, join, resolve } from 'node:path'
 import interstage from 'interstage/vite'
 import typegpu from 'unplugin-typegpu/vite'
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig, type Plugin } from 'vite-plus'
 
 const pages = ['index', 'slime/index', 'ink/index', 'sculpture/index', 'atlas/index', 'postcard/index']
 
