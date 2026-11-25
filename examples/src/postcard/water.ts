@@ -8,12 +8,15 @@ const CELL = 4;
 export function waterEffect(scene: Scene): Effect {
   const { root } = scene;
   const params = root.createBuffer(water.Water).$usage("uniform");
+
   const shared = root.createBindGroup(water.layout0, {
     water: params,
     page: scene.page,
     pageSampler: scene.sampler,
   });
+
   const ripple = root.createComputePipeline({ compute: water.ripple });
+
   const shade = root.createRenderPipeline({
     vertex: water.fullscreen,
     fragment: water.shade,
@@ -25,9 +28,11 @@ export function waterEffect(scene: Scene): Effect {
       Math.ceil(scene.canvas.width / CELL),
       Math.ceil(scene.canvas.height / CELL),
     );
+
     const heights = [0, 1, 2].map(() =>
       root.createBuffer(d.arrayOf(d.f32, grid.x * grid.y)).$usage("storage"),
     );
+
     // Rotation k reads heights k and the one before, and writes the one after.
     const groups = [0, 1, 2].map((k) =>
       root.createBindGroup(water.layout1, {
@@ -36,8 +41,10 @@ export function waterEffect(scene: Scene): Effect {
         nextHeights: heights[(k + 1) % 3]!,
       }),
     );
+
     return { grid, heights, groups, current: 0 };
   };
+
   let sheet = createSheet();
   let nextDrop = 0;
 
@@ -53,6 +60,7 @@ export function waterEffect(scene: Scene): Effect {
       const speed = Math.hypot(pointer.dx, pointer.dy) / card.scale;
       nextDrop -= dt;
       const drop = nextDrop <= 0;
+
       if (drop) nextDrop = 0.25 + Math.random() * 0.9;
       params.write({
         canvas: d.vec2f(scene.canvas.width, scene.canvas.height),
@@ -65,10 +73,12 @@ export function waterEffect(scene: Scene): Effect {
         damping: 0.986,
         scale: card.scale,
       });
+
       const tiles = [
         Math.ceil(sheet.grid.x / water.WORKGROUP),
         Math.ceil(sheet.grid.y / water.WORKGROUP),
       ] as const;
+
       ripple
         .with(shared)
         .with(sheet.groups[sheet.current]!)

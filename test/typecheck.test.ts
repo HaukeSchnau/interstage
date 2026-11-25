@@ -67,6 +67,7 @@ for (const compiler of compilers) {
       const { output } = await typeCheck(compiler, fixture("validated"), {
         VK_ICD_FILENAMES: "/nonexistent",
       });
+
       assert.match(
         output,
         /^tsconfig\.json\(\d+,\d+\): error wgsl6: Shader validation found no WebGPU adapter/,
@@ -79,6 +80,7 @@ function copyFixture(compiler: Compiler, name: string, as: string): string {
   const target = new URL(`.tmp/${compiler}/${as}`, import.meta.url).pathname;
   rmSync(target, { recursive: true, force: true });
   cpSync(fixture(name), target, { recursive: true });
+
   return target;
 }
 

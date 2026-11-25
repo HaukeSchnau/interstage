@@ -8,13 +8,18 @@ import { waterEffect } from "./water.ts";
 import "./style.css";
 
 const status: NonNullable<Window["__interstage"]> = { frames: 0, errors: [] };
+
 window.__interstage = status;
+
 addEventListener("error", (event) => status.errors.push(String(event.message)));
+
 addEventListener("unhandledrejection", (event) => status.errors.push(String(event.reason)));
 
 function byId<T extends Element>(id: string, type: abstract new (...args: never[]) => T): T {
   const element = document.getElementById(id);
+
   if (!(element instanceof type)) throw new Error(`#${id} is missing`);
+
   return element;
 }
 
@@ -39,22 +44,28 @@ const sources = {
     eager: true,
   }),
 };
+
 const source = (path: string) => {
   const text = sources[path];
+
   if (text === undefined) throw new Error(`${path} is missing`);
+
   return text;
 };
+
 const shader = (name: string): ContractFile => ({
   name: `${name}.wgsl`,
   shader: source(`./${name}.wgsl`),
   declarations: source(`../../.contract/postcard/${name}.d.wgsl.ts`),
 });
+
 const host = (name: string): ContractFile => ({
   name: `${name}.ts`,
   source: source(`./${name}.ts`),
 });
 
 document.body.append(header("Postcard"));
+
 document.body.append(
   drawer([
     shader("stage"),
@@ -73,12 +84,15 @@ document.body.append(
 
 const clock = byId("clock", HTMLTimeElement);
 const time = new Intl.DateTimeFormat(undefined, { timeStyle: "medium" });
+
 const tick = () => {
   const now = new Date();
   clock.dateTime = now.toISOString();
   clock.textContent = time.format(now);
 };
+
 tick();
+
 setInterval(tick, 1000);
 
 form.addEventListener("change", (event) => {
@@ -86,6 +100,7 @@ form.addEventListener("change", (event) => {
     byId("stamp-face", HTMLElement).textContent = event.target.value;
   }
 });
+
 form.addEventListener("input", (event) => {
   if (event.target instanceof HTMLInputElement && event.target.name === "postage") {
     byId("postage-value", HTMLOutputElement).value = `€${event.target.value}`;
@@ -99,6 +114,7 @@ const showReceipt = () => {
   form.hidden = true;
   sent.hidden = false;
 };
+
 const showForm = () => {
   sent.hidden = true;
   form.hidden = false;
@@ -106,10 +122,12 @@ const showForm = () => {
 
 /** What Send and Write another do; the canvas replaces it with the dust. */
 let turn = (swap: () => void) => swap();
+
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   turn(showReceipt);
 });
+
 byId("again", HTMLButtonElement).addEventListener("click", () => turn(showForm));
 
 // --- The canvas -----------------------------------------------------------------------------------
@@ -129,6 +147,7 @@ function fallBack(reason: string) {
 }
 
 const reason = unsupported(canvas);
+
 if (reason) fallBack(reason);
 else
   start().catch((error: unknown) =>
@@ -165,6 +184,7 @@ async function start() {
 
   const pointer: Pointer = { x: 0, y: 0, dx: 0, dy: 0, seen: false };
   fitCanvas();
+
   const scene: Scene = {
     root,
     canvas,
@@ -177,11 +197,14 @@ async function start() {
   };
 
   const dust = dustEffect(scene);
+
   const effects = { water: waterEffect(scene), cloth: clothEffect(scene), dust } satisfies Record<
     string,
     Effect
   >;
+
   type Mode = keyof typeof effects;
+
   const isMode = (value: string | null | undefined): value is Mode => !!value && value in effects;
   let effect: Effect = effects.water;
 
@@ -189,14 +212,17 @@ async function start() {
     effect = effects[mode];
     effect.enter();
     hint.textContent = effect.hint;
+
     for (const button of modeButtons)
       button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
   };
+
   for (const button of modeButtons) {
     button.addEventListener("click", () => {
       if (isMode(button.dataset.mode)) choose(button.dataset.mode);
     });
   }
+
   const requested = params.get("mode");
   choose(isMode(requested) ? requested : "water");
 
@@ -214,6 +240,7 @@ async function start() {
   canvas.addEventListener("pointerdown", (event) => {
     pointer.x = event.clientX * scene.ratio;
     pointer.y = event.clientY * scene.ratio;
+
     if (effect.press?.(event.target)) {
       event.preventDefault();
       canvas.setPointerCapture(event.pointerId);
@@ -233,6 +260,7 @@ async function start() {
     // Right of the panel when there's room, above it otherwise.
     const beside = width - side.right >= cssWidth * 0.6 + margin * 2;
     const room = beside ? { left: side.right, bottom: height } : { left: 0, bottom: side.top };
+
     const fit = Math.max(
       0.3,
       Math.min(
@@ -241,11 +269,14 @@ async function start() {
         (room.bottom - top - margin * 2) / cssHeight,
       ),
     );
+
     const centerX = beside
       ? Math.max(width / 2, room.left + margin + (cssWidth * fit) / 2)
       : width / 2;
+
     const centerY = (top + room.bottom) / 2;
     const ratio = devicePixelRatio;
+
     return {
       x: Math.round((centerX - (cssWidth * fit) / 2) * ratio),
       y: Math.round((centerY - (cssHeight * fit) / 2) * ratio),
@@ -266,6 +297,7 @@ async function start() {
     fitCanvas();
     scene.ratio = devicePixelRatio;
     scene.card = layOut();
+
     if (captureAt > 0) {
       offscreen?.destroy();
       offscreen = root.device.createTexture({
@@ -274,14 +306,17 @@ async function start() {
         usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
       });
     }
+
     for (const each of Object.values(effects)) each.resize();
   };
+
   resize();
   new ResizeObserver(resize).observe(canvas);
 
   let previous = performance.now();
   const started = previous;
   let last = { x: pointer.x, y: pointer.y };
+
   const frame = (now: number) => {
     if (halt.signal.aborted) return;
     const dt = Math.min((now - previous) / 1000, 1 / 20);
@@ -294,19 +329,25 @@ async function start() {
     effect.draw(offscreen?.createView() ?? context);
     place();
     status.frames++;
+
     if (offscreen && status.frames === captureAt)
       void capture(root, offscreen).then((url) => (status.capture = url));
+
     // A canvas paces frames to the GPU; offscreen, the queue would grow without bound on a slow one.
     if (offscreen)
       void root.device.queue.onSubmittedWorkDone().then(() => requestAnimationFrame(frame));
     else requestAnimationFrame(frame);
   };
+
   requestAnimationFrame(frame);
 
   const placeCard = elementPlacer(canvas, card);
+
   function place() {
     const placement = effect.placement();
+
     if (card.inert !== !placement) card.inert = !placement;
+
     if (placement) placeCard(placement);
     // Where the card is drawn, so scripts/check.ts can click it there.
     status.placement = placement && [

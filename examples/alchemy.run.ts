@@ -26,6 +26,7 @@ export default Alchemy.Stack(
   { providers: Cloudflare.providers(), state },
   Effect.gen(function* () {
     const { stage } = yield* Alchemy.Stack;
+
     const site = yield* Cloudflare.Website.StaticSite("Site", {
       command: "pnpm run build",
       outdir: "dist",
@@ -41,6 +42,7 @@ export default Alchemy.Stack(
           }
         : { preview: { of: yield* Cloudflare.Worker.ref("Site", { stage: production }) } }),
     });
+
     return { url: site.url };
   }),
 );

@@ -7,6 +7,7 @@ import { createStage } from "./stage.ts";
 
 const GRID = d.vec2u(30, 40);
 const STEP = 1 / 120;
+
 /** Spring relaxations per step; even, so the result lands back in `points`. */
 const RELAXATIONS = 24;
 const FIELD_OF_VIEW = Math.PI / 6;
@@ -27,23 +28,27 @@ export function clothEffect(scene: Scene): Effect {
 
   const world = root.createBindGroup(sim.layout0, { physics });
   const forward = root.createBindGroup(sim.layout1, { points, relaxed, previous, grab });
+
   const backward = root.createBindGroup(sim.layout1, {
     points: relaxed,
     relaxed: points,
     previous,
     grab,
   });
+
   const look = root.createBindGroup(draw.layout0, {
     camera,
     page: scene.page,
     pageSampler: scene.sampler,
   });
+
   const mesh = root.createBindGroup(draw.layout1, { points });
 
   const hang = root.createComputePipeline({ compute: sim.hang });
   const pick = root.createComputePipeline({ compute: sim.pick });
   const integrate = root.createComputePipeline({ compute: sim.integrate });
   const relax = root.createComputePipeline({ compute: sim.relax });
+
   const fold = root.createRenderPipeline({
     vertex: draw.foldVertex,
     fragment: draw.foldFragment,
@@ -52,6 +57,7 @@ export function clothEffect(scene: Scene): Effect {
     // The grid's triangles wind clockwise on screen when the printed side faces the camera.
     primitive: { cullMode: "none", frontFace: "cw" },
   });
+
   const backdrop = createStage(scene);
   const tiles = Math.ceil(count / sim.WORKGROUP);
 
@@ -59,6 +65,7 @@ export function clothEffect(scene: Scene): Effect {
     root
       .createTexture({ size: [scene.canvas.width, scene.canvas.height], format: "depth24plus" })
       .$usage("render");
+
   let depth = createDepth();
   let viewProjection: Mat4 = mat4.identity();
   let holding = false;
@@ -70,20 +77,24 @@ export function clothEffect(scene: Scene): Effect {
   const aim = () => {
     const { card, canvas } = scene;
     const distance = canvas.height / card.scale / 2 / Math.tan(FIELD_OF_VIEW / 2);
+
     const projection = mat4.perspective(
       FIELD_OF_VIEW,
       canvas.width / canvas.height,
       distance * 0.25,
       distance * 4,
     );
+
     const view = mat4.lookAt([0, 0, distance], [0, 0, 0], [0, 1, 0]);
     const centerX = card.x + card.width / 2;
     const centerY = card.y + card.height / 2;
+
     const shift = mat4.translation([
       (centerX / canvas.width) * 2 - 1,
       1 - (centerY / canvas.height) * 2,
       0,
     ]);
+
     viewProjection = mat4.multiply(shift, mat4.multiply(projection, view));
   };
 
@@ -106,6 +117,7 @@ export function clothEffect(scene: Scene): Effect {
   const toCanvas = (x: number, y: number, z: number) => {
     const clip = vec4.transformMat4([x, y, z, 1], viewProjection);
     const ratio = scene.ratio;
+
     return new DOMPoint(
       ((clip[0]! / clip[3]! + 1) / 2) * (scene.canvas.width / ratio),
       ((1 - clip[1]! / clip[3]!) / 2) * (scene.canvas.height / ratio),
@@ -121,6 +133,7 @@ export function clothEffect(scene: Scene): Effect {
     const topLeft = at[0];
     const topRight = at[GRID.x - 1];
     const bottomLeft = at[(GRID.y - 1) * GRID.x];
+
     if (!topLeft || !topRight || !bottomLeft) return;
     const origin = toCanvas(topLeft.x, topLeft.y, topLeft.z);
     const across = toCanvas(topRight.x, topRight.y, topRight.z);
@@ -153,14 +166,17 @@ export function clothEffect(scene: Scene): Effect {
     },
     update(dt, time) {
       behind = Math.min(behind + dt, STEP * 4);
+
       for (; behind >= STEP; behind -= STEP) {
         writePhysics(time);
         integrate.with(world).with(forward).dispatchWorkgroups(tiles);
+
         for (let i = 0; i < RELAXATIONS; i += 2) {
           relax.with(world).with(forward).dispatchWorkgroups(tiles);
           relax.with(world).with(backward).dispatchWorkgroups(tiles);
         }
       }
+
       void follow();
     },
     draw(target) {
@@ -185,6 +201,7 @@ export function clothEffect(scene: Scene): Effect {
       grab.write(0xffffffff);
       writePhysics(0);
       pick.with(world).with(forward).dispatchWorkgroups(tiles);
+
       return true;
     },
     release() {

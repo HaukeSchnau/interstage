@@ -11,6 +11,7 @@ afterAll(async () => (await gpu()).destroy());
 
 test("every entry point resolves to WGSL that Tint accepts", async () => {
   const root = await gpu();
+
   const programs = [
     tgpu.resolve([particles.simulate]),
     tgpu.resolve([particles.vs, particles.fs]),
@@ -18,6 +19,7 @@ test("every entry point resolves to WGSL that Tint accepts", async () => {
     tgpu.resolve([structs.vs, structs.fs]),
     tgpu.resolve([builtins.vs, builtins.fs]),
   ];
+
   for (const code of programs) assert.deepEqual(await compileErrors(root, code), [], code);
 });
 
@@ -41,27 +43,33 @@ test("a compute entry point runs with its constants, helper and binding", async 
 
 test("a vertex struct output reaches a fragment struct parameter", async () => {
   const root = await gpu();
+
   const pipeline = root.createRenderPipeline({
     vertex: structs.vs,
     fragment: structs.fs,
     targets: { format: "rgba8unorm" },
   });
+
   const pixels = await renderPixels(root, (view) =>
     pipeline.withColorAttachment({ view, loadOp: "clear", storeOp: "store" }).draw(3),
   );
+
   assert.deepEqual([...pixels.slice(0, 4)], [255, 128, 64, 255]);
 });
 
 test("a vertex builtin return reaches a fragment builtin parameter", async () => {
   const root = await gpu();
+
   const pipeline = root.createRenderPipeline({
     vertex: builtins.vs,
     fragment: builtins.fs,
     targets: { format: "rgba8unorm" },
   });
+
   const pixels = await renderPixels(root, (view) =>
     pipeline.withColorAttachment({ view, loadOp: "clear", storeOp: "store" }).draw(3),
   );
+
   // The pixel at (1, 0) has its center at (1.5, 0.5).
   assert.deepEqual(
     [...pixels.slice(4, 8)],

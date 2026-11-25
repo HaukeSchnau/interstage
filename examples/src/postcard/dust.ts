@@ -7,6 +7,7 @@ import { createStage } from "./stage.ts";
 /** Seconds of scattering before the page changes underneath and the motes turn home. */
 const SCATTER = 2.4;
 const RETURN = 2.6;
+
 /** At most this many motes across the card. */
 const ACROSS = 320;
 
@@ -28,6 +29,7 @@ export function dustEffect(scene: Scene): Dust {
   const look = root.createBindGroup(draw.layout0, { specks, page: scene.page });
   const gather = root.createComputePipeline({ compute: sim.gather });
   const drift = root.createComputePipeline({ compute: sim.drift });
+
   const speck = root.createRenderPipeline({
     vertex: draw.speckVertex,
     fragment: draw.speckFragment,
@@ -39,6 +41,7 @@ export function dustEffect(scene: Scene): Dust {
       },
     },
   });
+
   const backdrop = createStage(scene);
   const [texelsAcross = 1, texelsDown = 1] = scene.page.props.size;
 
@@ -47,6 +50,7 @@ export function dustEffect(scene: Scene): Dust {
     const across = Math.min(ACROSS, Math.round(card.width / 2));
     const grid = d.vec2u(across, Math.round((across * card.cssHeight) / card.cssWidth));
     const motes = root.createBuffer(d.arrayOf(sim.Mote, grid.x * grid.y)).$usage("storage");
+
     return {
       grid,
       motes,
@@ -55,6 +59,7 @@ export function dustEffect(scene: Scene): Dust {
       tiles: Math.ceil((grid.x * grid.y) / sim.WORKGROUP),
     };
   };
+
   let cloud = createCloud();
   let phase: Phase = { name: "still" };
 
@@ -92,25 +97,31 @@ export function dustEffect(scene: Scene): Dust {
     update(dt) {
       if (phase.name === "still") return;
       phase.time += dt;
+
       if (phase.name === "scattering" && phase.time >= SCATTER) {
         phase.swap();
         phase = { name: "returning", time: 0 };
       } else if (phase.name === "returning" && phase.time >= RETURN) {
         phase = { name: "still" };
+
         return;
       }
+
       writeBreeze(phase.time, dt, phase.name === "returning");
       drift.with(air).with(cloud.flying).dispatchWorkgroups(cloud.tiles);
     },
     draw(target) {
       if (phase.name === "still") {
         backdrop(target, { cardOpacity: 1, shadowOpacity: 1 });
+
         return;
       }
+
       const shadow =
         phase.name === "scattering"
           ? Math.max(0, 1 - phase.time / 0.8)
           : Math.min(1, phase.time / 1.6);
+
       backdrop(target, { cardOpacity: 0, shadowOpacity: shadow });
       const { card, canvas } = scene;
       specks.write({

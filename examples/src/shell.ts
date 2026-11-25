@@ -80,6 +80,7 @@ export async function demo<const Controls extends readonly Control[]>(
   document.body.append(drawer(options.contract));
 
   let root: TgpuRoot;
+
   try {
     if (!navigator.gpu) throw new Error("This browser has no WebGPU.");
     root = tgpu.initFromDevice({ device: await (await requestAdapter()).requestDevice() });
@@ -87,6 +88,7 @@ export async function demo<const Controls extends readonly Control[]>(
     fallback(error);
     throw error;
   }
+
   root.device.addEventListener("uncapturederror", (event) =>
     status.errors.push(event.error.message),
   );
@@ -97,12 +99,14 @@ export async function demo<const Controls extends readonly Control[]>(
 
   const captureAt = Number(params.get("capture") ?? 0);
   const format = navigator.gpu.getPreferredCanvasFormat();
+
   // Headless Chrome on Linux destroys a device as soon as it presents to a canvas, so `?capture`
   // renders into a texture of the same format that scripts/check.ts reads back.
   const context =
     captureAt > 0
       ? undefined
       : root.configureContext({ canvas, format, alphaMode: "premultiplied" });
+
   let offscreen: GPUTexture | undefined;
 
   const values = Object.fromEntries(
@@ -110,13 +114,16 @@ export async function demo<const Controls extends readonly Control[]>(
   ) as {
     [Key in Controls[number]["key"]]: number;
   };
+
   document.body.append(panel(options, values));
 
   const resizeListeners: Array<(width: number, height: number) => void> = [];
+
   const resize = () => {
     const ratio = Math.min(devicePixelRatio, quality === "low" ? 1 : 2);
     canvas.width = Math.max(1, Math.round(canvas.clientWidth * ratio));
     canvas.height = Math.max(1, Math.round(canvas.clientHeight * ratio));
+
     if (!context) {
       offscreen?.destroy();
       offscreen = root.device.createTexture({
@@ -125,19 +132,23 @@ export async function demo<const Controls extends readonly Control[]>(
         usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
       });
     }
+
     for (const listener of resizeListeners) listener(canvas.width, canvas.height);
   };
+
   new ResizeObserver(resize).observe(canvas);
   resize();
 
   const pointer: Pointer = { x: 0.5, y: 0.5, dx: 0, dy: 0, down: false, seen: false };
   let last = { x: 0.5, y: 0.5 };
+
   const move = (event: PointerEvent) => {
     const rect = canvas.getBoundingClientRect();
     pointer.x = (event.clientX - rect.left) / rect.width;
     pointer.y = (event.clientY - rect.top) / rect.height;
     pointer.seen = true;
   };
+
   canvas.addEventListener("pointermove", move);
   canvas.addEventListener("pointerdown", (event) => {
     move(event);
@@ -164,6 +175,7 @@ export async function demo<const Controls extends readonly Control[]>(
     run(frame: (frame: Frame) => void) {
       let previous = performance.now();
       const start = previous;
+
       const tick = (now: number) => {
         const dt = Math.min((now - previous) / 1000, 1 / 20);
         previous = now;
@@ -172,14 +184,17 @@ export async function demo<const Controls extends readonly Control[]>(
         last = { x: pointer.x, y: pointer.y };
         frame({ time: (now - start) / 1000, dt, index: status.frames });
         status.frames++;
+
         if (offscreen && status.frames === captureAt)
           void capture(root, offscreen).then((url) => (status.capture = url));
+
         // A canvas paces frames to the GPU; offscreen, the queue would grow without bound on a slow
         // one, and the next page would wait for it to drain.
         if (offscreen)
           void root.device.queue.onSubmittedWorkDone().then(() => requestAnimationFrame(tick));
         else requestAnimationFrame(tick);
       };
+
       requestAnimationFrame(tick);
     },
   };
@@ -189,31 +204,38 @@ export async function demo<const Controls extends readonly Control[]>(
 export async function capture(root: TgpuRoot, texture: GPUTexture): Promise<string> {
   const { width, height, format } = texture;
   const bytesPerRow = Math.ceil((width * 4) / 256) * 256;
+
   const buffer = root.device.createBuffer({
     size: bytesPerRow * height,
     usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
   });
+
   const encoder = root.device.createCommandEncoder();
   encoder.copyTextureToBuffer({ texture }, { buffer, bytesPerRow }, [width, height]);
   root.device.queue.submit([encoder.finish()]);
   await buffer.mapAsync(GPUMapMode.READ);
   const rows = new Uint8Array(buffer.getMappedRange());
   const pixels = new ImageData(width, height);
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const from = y * bytesPerRow + x * 4;
       const to = (y * width + x) * 4;
+
       const [r, g, b] =
         format === "bgra8unorm"
           ? [rows[from + 2]!, rows[from + 1]!, rows[from]!]
           : [rows[from]!, rows[from + 1]!, rows[from + 2]!];
+
       pixels.data.set([r, g, b, 255], to);
     }
   }
+
   buffer.destroy();
   const canvas = new OffscreenCanvas(width, height);
   canvas.getContext("2d")!.putImageData(pixels, 0, 0);
   const blob = await canvas.convertToBlob({ type: "image/png" });
+
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
@@ -226,6 +248,7 @@ export function header(title: string): HTMLElement {
   element.className = "demo-header";
   element.innerHTML = `<a class="home" href="../">interstage</a><h1></h1><button class="contract-toggle" type="button" aria-pressed="false" aria-controls="contract">Show the shaders</button>`;
   element.querySelector("h1")!.textContent = title;
+
   return element;
 }
 
@@ -236,11 +259,13 @@ function panel<Controls extends readonly Control[]>(
   const element = document.createElement("section");
   element.className = "panel";
   element.setAttribute("aria-label", "Controls");
+
   for (const paragraph of options.description) {
     const p = document.createElement("p");
     p.innerHTML = paragraph;
     element.append(p);
   }
+
   for (const control of options.controls) {
     const label = document.createElement("label");
     label.className = "control";
@@ -264,9 +289,11 @@ function panel<Controls extends readonly Control[]>(
     });
     element.append(label);
   }
+
   if (options.actions?.length) {
     const actions = document.createElement("div");
     actions.className = "actions";
+
     for (const action of options.actions) {
       const button = document.createElement("button");
       button.type = "button";
@@ -274,8 +301,10 @@ function panel<Controls extends readonly Control[]>(
       button.addEventListener("click", action.run);
       actions.append(button);
     }
+
     element.append(actions);
   }
+
   return element;
 }
 
@@ -295,6 +324,7 @@ export function drawer(files: ContractFile[]): HTMLElement {
     <pre class="code" tabindex="0"></pre>`;
   const tabs = element.querySelector(".tabs")!;
   const pre = element.querySelector("pre")!;
+
   const views = files.map((file) =>
     "shader" in file
       ? {
@@ -302,11 +332,13 @@ export function drawer(files: ContractFile[]): HTMLElement {
           language: "wgsl",
           html: () => {
             const shared = sharedNames(file.shader, file.declarations);
+
             return `${highlight(file.shader, "wgsl", shared)}\n\n<span class="c">// The declarations interstage writes for ${file.name}, which is what tsc sees</span>\n\n${highlight(file.declarations, "ts", shared)}`;
           },
         }
       : { name: file.name, language: "ts", html: () => highlight(file.source, "ts", new Set()) },
   );
+
   const select = (index: number) => {
     pre.innerHTML = views[index]!.html();
     pre.scrollTop = 0;
@@ -314,6 +346,7 @@ export function drawer(files: ContractFile[]): HTMLElement {
       .querySelectorAll("button")
       .forEach((button, i) => button.setAttribute("aria-selected", String(i === index)));
   };
+
   views.forEach((view, index) => {
     const button = document.createElement("button");
     button.type = "button";
@@ -328,6 +361,7 @@ export function drawer(files: ContractFile[]): HTMLElement {
   pre.addEventListener("pointerover", (event) => {
     const target = (event.target as HTMLElement).closest<HTMLElement>(".id[data-shared]");
     pre.querySelectorAll(".lit").forEach((node) => node.classList.remove("lit"));
+
     if (target)
       pre
         .querySelectorAll(`.id[data-name="${target.dataset.name}"]`)
@@ -339,6 +373,7 @@ export function drawer(files: ContractFile[]): HTMLElement {
     element.dataset.open = String(open);
     document.querySelector(".contract-toggle")?.setAttribute("aria-pressed", String(open));
   };
+
   queueMicrotask(() =>
     document.querySelector(".contract-toggle")?.addEventListener("click", toggle),
   );
@@ -346,12 +381,14 @@ export function drawer(files: ContractFile[]): HTMLElement {
   addEventListener("keydown", (event) => {
     if (event.key === "Escape" && element.dataset.open === "true") toggle();
   });
+
   return element;
 }
 
 /** Names written in both files. The highlighter only marks plain identifiers with them. */
 function sharedNames(shader: string, declarations: string): Set<string> {
   const declared = new Set(declarations.match(/[A-Za-z_]\w*/g));
+
   return new Set(shader.match(/[A-Za-z_]\w*/g)?.filter((word) => declared.has(word)));
 }
 
@@ -359,9 +396,11 @@ function sharedNames(shader: string, declarations: string): Set<string> {
 export async function requestAdapter(): Promise<GPUAdapter> {
   for (let attempt = 0; attempt < 5; attempt++) {
     const adapter = await navigator.gpu.requestAdapter();
+
     if (adapter) return adapter;
     await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));
   }
+
   throw new Error("The browser found no GPU adapter.");
 }
 

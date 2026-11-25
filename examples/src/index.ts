@@ -5,4 +5,5 @@ import "./style.css";
 for (const pre of document.querySelectorAll<HTMLElement>("pre.code > code")) {
   pre.innerHTML = highlight(pre.textContent ?? "", "ts", new Set());
 }
+
 mountEditor();

@@ -18,6 +18,7 @@ export interface Size {
 export function slimeSimulation(root: TgpuRoot, format: GPUTextureFormat) {
   const params = root.createBuffer(slime.Params).$usage("uniform");
   const shared = root.createBindGroup(slime.layout0, { params });
+
   const pipelines = {
     scatter: root.createComputePipeline({ compute: slime.scatter }),
     clear: root.createComputePipeline({ compute: slime.clear }),
@@ -35,20 +36,25 @@ export function slimeSimulation(root: TgpuRoot, format: GPUTextureFormat) {
       Math.max(64, Math.round(canvas.x * scale)),
       Math.max(64, Math.round(canvas.y * scale)),
     );
+
     const agentCount = Math.round(size.x * size.y * density);
     const agents = root.createBuffer(d.arrayOf(slime.Agent, agentCount)).$usage("storage");
+
     const trails = [0, 1].map(() =>
       root.createBuffer(d.arrayOf(d.vec4f, size.x * size.y)).$usage("storage"),
     );
+
     const groups = [0, 1].map((i) =>
       root.createBindGroup(slime.layout1, { agents, trail: trails[i]!, trailNext: trails[1 - i]! }),
     );
+
     return { canvas, size, agentCount, buffers: [agents, ...trails], groups, current: 0 };
   };
 
   let world: ReturnType<typeof createWorld> | undefined;
   let time = 0;
   const agentGroups = () => Math.ceil(world!.agentCount / slime.WORKGROUP);
+
   const tiles = () =>
     [Math.ceil(world!.size.x / slime.TILE), Math.ceil(world!.size.y / slime.TILE)] as const;
 
@@ -58,6 +64,7 @@ export function slimeSimulation(root: TgpuRoot, format: GPUTextureFormat) {
     pointer?: { x: number; y: number; pull: boolean },
   ) => {
     const { size, canvas, agentCount } = world!;
+
     const values: d.Infer<typeof slime.Params> = {
       ...behaviour,
       size,
@@ -69,6 +76,7 @@ export function slimeSimulation(root: TgpuRoot, format: GPUTextureFormat) {
       pointerForce: pointer?.pull ? 6 : 0,
       agentCount,
     };
+
     params.write(values);
   };
 

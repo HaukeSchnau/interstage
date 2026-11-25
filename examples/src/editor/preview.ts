@@ -25,6 +25,7 @@ interface Options {
 export function createPreview(canvas: HTMLCanvasElement, device: GPUDevice, options: Options) {
   const format = navigator.gpu.getPreferredCanvasFormat();
   const canvasContext = canvas.getContext("webgpu");
+
   if (!canvasContext) throw new Error("The preview canvas has no WebGPU context.");
   canvasContext.configure({ device, format, alphaMode: "opaque" });
 
@@ -32,6 +33,7 @@ export function createPreview(canvas: HTMLCanvasElement, device: GPUDevice, opti
   // draws into a texture instead. main.ts only reads `canvas`, and TypeGPU takes anything with
   // getCurrentTexture() for a context.
   let offscreen: GPUTexture | undefined;
+
   const context =
     options.captureAt > 0
       ? ({
@@ -41,12 +43,14 @@ export function createPreview(canvas: HTMLCanvasElement, device: GPUDevice, opti
       : canvasContext;
 
   const pointer = { x: 0, y: 0 };
+
   const resize = () => {
     const ratio = Math.min(devicePixelRatio, 2);
     canvas.width = Math.max(1, Math.round(canvas.clientWidth * ratio));
     canvas.height = Math.max(1, Math.round(canvas.clientHeight * ratio));
     pointer.x = canvas.width / 2;
     pointer.y = canvas.height * 0.62;
+
     if (options.captureAt > 0) {
       offscreen?.destroy();
       offscreen = device.createTexture({
@@ -56,6 +60,7 @@ export function createPreview(canvas: HTMLCanvasElement, device: GPUDevice, opti
       });
     }
   };
+
   resize();
   new ResizeObserver(resize).observe(canvas);
   canvas.addEventListener("pointermove", (event) => {
@@ -75,11 +80,13 @@ export function createPreview(canvas: HTMLCanvasElement, device: GPUDevice, opti
 
   let visible = true;
   new IntersectionObserver(([entry]) => (visible = entry?.isIntersecting ?? true)).observe(canvas);
+
   const frame = () => {
     if (running && visible) {
       try {
         running.draw(time());
         status.frames++;
+
         if (offscreen && status.frames % options.captureAt === 0)
           void capture(running.root, offscreen).then((url) => (status.capture = url));
       } catch (error) {
@@ -87,10 +94,12 @@ export function createPreview(canvas: HTMLCanvasElement, device: GPUDevice, opti
         options.onError(error instanceof Error ? error.message : String(error));
       }
     }
+
     // A canvas paces frames to the GPU; offscreen, the queue would grow without bound on a slow one.
     if (offscreen) void device.queue.onSubmittedWorkDone().then(() => requestAnimationFrame(frame));
     else requestAnimationFrame(frame);
   };
+
   requestAnimationFrame(frame);
 
   return {
@@ -102,6 +111,7 @@ export function createPreview(canvas: HTMLCanvasElement, device: GPUDevice, opti
       if (running?.key === key) return undefined;
       const root = tgpu.initFromDevice({ device });
       const registered: { draw?: (time: number) => void } = {};
+
       const page = {
         root,
         context,
@@ -109,22 +119,28 @@ export function createPreview(canvas: HTMLCanvasElement, device: GPUDevice, opti
         pointer,
         onFrame: (draw: (time: number) => void) => (registered.draw = draw),
       };
+
       const modules: Record<string, object> = { typegpu, "./page": page };
       globalThis.__interstageEditor = modules;
+
       try {
         modules["./lamp.wgsl"] = await load(shaderModule);
         await load(main);
         const { draw } = registered;
+
         if (!draw) throw new Error("main.ts never calls onFrame(), so there is nothing to draw.");
         device.pushErrorScope("validation");
         draw(time());
         const error = await device.popErrorScope();
+
         if (error) throw new Error(error.message);
         running?.root.destroy();
         running = { key, root, draw };
+
         return undefined;
       } catch (error) {
         root.destroy();
+
         return error instanceof Error ? error.message : String(error);
       } finally {
         globalThis.__interstageEditor = undefined;
@@ -153,6 +169,7 @@ async function load(code: string): Promise<object> {
           `There is no '${specifier}' here. The editor has typegpu, ./lamp.wgsl and ./page.`,
         );
       const module = `globalThis.__interstageEditor[${JSON.stringify(specifier)}]`;
+
       return [
         defaultName && `const ${defaultName} = ${module}.default;`,
         namespace && `const ${namespace} = ${module};`,
@@ -162,7 +179,9 @@ async function load(code: string): Promise<object> {
         .join(" ");
     },
   );
+
   const url = URL.createObjectURL(new Blob([linked], { type: "text/javascript" }));
+
   try {
     return await import(/* @vite-ignore */ url);
   } finally {

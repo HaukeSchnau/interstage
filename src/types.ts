@@ -13,6 +13,7 @@ export type Ty =
 export const SCALARS = new Set(["i32", "u32", "f32", "f16", "bool"]);
 
 const SHORTHAND_SCALAR: Record<string, Scalar> = { i: "i32", u: "u32", f: "f32", h: "f16" };
+
 const SCALAR_SUFFIX: Partial<Record<Scalar, string>> = {
   i32: "i",
   u32: "u",
@@ -28,7 +29,9 @@ export function vectorShape(
   name: string,
 ): { size: number; scalar: Scalar | undefined } | undefined {
   const match = /^vec([234])([iufh]?)$/.exec(name);
+
   if (!match) return undefined;
+
   return { size: Number(match[1]), scalar: match[2] ? SHORTHAND_SCALAR[match[2]] : undefined };
 }
 
@@ -36,7 +39,9 @@ export function matrixShape(
   name: string,
 ): { columns: number; rows: number; scalar: Scalar | undefined } | undefined {
   const match = /^mat([234])x([234])([fh]?)$/.exec(name);
+
   if (!match) return undefined;
+
   return {
     columns: Number(match[1]),
     rows: Number(match[2]),
@@ -46,7 +51,9 @@ export function matrixShape(
 
 export function concrete(scalar: Scalar): Scalar {
   if (scalar === "abstract-int") return "i32";
+
   if (scalar === "abstract-float") return "f32";
+
   return scalar;
 }
 
@@ -108,53 +115,76 @@ export interface TypeScope {
 export function scopeOf(decls: Decl[], count: TypeScope["count"]): TypeScope {
   const structs = new Map<string, StructDecl>();
   const aliases = new Map<string, AliasDecl>();
+
   for (const decl of decls) {
     if (decl.kind === "struct") structs.set(decl.name.name, decl);
+
     if (decl.kind === "alias") aliases.set(decl.name.name, decl);
   }
+
   return { structs, aliases, count };
 }
 
 /** Resolves a written type to the value type a const-expression can have, or throws. */
 export function toTy(type: TypeExpr, scope: TypeScope, seen = new Set<string>()): Ty {
   const name = type.name.name;
+
   const elementOf = (index: number): Scalar | undefined => {
     const arg = type.args[index];
+
     if (arg?.kind !== "type") return undefined;
     const inner = toTy(arg, scope, seen);
+
     if (inner.kind !== "scalar") throw new Error(`Expected a scalar type in '${name}'`);
+
     return inner.scalar;
   };
+
   if (SCALARS.has(name)) return { kind: "scalar", scalar: name as Scalar };
   const vector = vectorShape(name);
+
   if (vector) {
     const scalar = vector.scalar ?? elementOf(0);
+
     if (!scalar) throw new Error(`'${name}' needs an element type`);
+
     return { kind: "vector", size: vector.size, scalar };
   }
+
   const matrix = matrixShape(name);
+
   if (matrix) {
     const scalar = matrix.scalar ?? elementOf(0);
+
     if (!scalar) throw new Error(`'${name}' needs an element type`);
+
     return { kind: "matrix", columns: matrix.columns, rows: matrix.rows, scalar };
   }
+
   if (name === "array") {
     const [element, count] = type.args;
+
     if (element?.kind !== "type" || !count)
       throw new Error("A constant array needs an element type and a count");
+
     return { kind: "array", element: toTy(element, scope, seen), count: scope.count(count) };
   }
+
   if (seen.has(name)) throw new Error(`'${name}' refers to itself`);
   const struct = scope.structs.get(name);
+
   if (struct) {
     const nested = new Set(seen).add(name);
+
     return {
       kind: "struct",
       name,
       members: struct.members.map((member) => [member.name.name, toTy(member.type, scope, nested)]),
     };
   }
+
   const alias = scope.aliases.get(name);
+
   if (alias) return toTy(alias.type, scope, new Set(seen).add(name));
   throw new Error(`'${name}' is not a type a constant can have`);
 }

@@ -9,8 +9,10 @@ import { extname, join } from "node:path";
 import { chromium, type Page } from "playwright-core";
 
 const linux = process.platform === "linux";
+
 const features = (...names: string[]) =>
   `--enable-features=${[...names, ...(linux ? ["Vulkan"] : [])].join(",")}`;
+
 const runs = [
   // chrome://flags#canvas-draw-element with experimental web platform features. The other pages
   // need neither.
@@ -27,12 +29,15 @@ const runs = [
     demos: ["postcard"],
   },
 ];
+
 const viewports: Record<string, { width: number; height: number }> = {
   editor: { width: 1280, height: 800 },
   // The postcard needs room beside its panel, or the panel covers the card's Send button.
   postcard: { width: 1024, height: 640 },
 };
+
 const dist = join(import.meta.dirname, "../dist");
+
 const types: Record<string, string> = {
   ".html": "text/html",
   ".js": "text/javascript",
@@ -45,18 +50,22 @@ const server = createServer(async (request, response) => {
   const path = new URL(request.url ?? "/", "http://localhost").pathname;
   const file = join(dist, path.endsWith("/") ? `${path}index.html` : path);
   const body = await readFile(file).catch(() => undefined);
+
   if (body)
     response
       .writeHead(200, { "content-type": types[extname(file)] ?? "application/octet-stream" })
       .end(body);
   else response.writeHead(404).end();
 });
+
 if (!process.env.ORIGIN)
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+
 const origin =
   process.env.ORIGIN ?? `http://127.0.0.1:${(server.address() as { port: number }).port}`;
 
 let failures = 0;
+
 for (const run of runs) {
   const browser = await chromium.launch({
     executablePath: process.env.CHROME,
@@ -73,6 +82,7 @@ for (const run of runs) {
       ...run.args,
     ],
   });
+
   const page = await browser.newPage({ viewport: { width: 640, height: 360 } });
 
   // A cold GPU process answers the first adapter requests with null, and a device made while it
@@ -91,8 +101,10 @@ for (const run of runs) {
     await page.goto(
       demo === "editor" ? `${origin}/?capture=45` : `${origin}/${demo}/?quality=low&capture=45`,
     );
+
     // The editor's lamp only draws while it is on screen.
     if (demo === "editor") await page.locator("#lamp").scrollIntoViewIfNeeded();
+
     const result = await page
       .waitForFunction(
         () =>
@@ -104,6 +116,7 @@ for (const run of runs) {
       .then(() =>
         page.evaluate(async () => {
           const { frames, errors, capture } = window.__interstage!;
+
           if (!capture) return { frames, errors, lit: 0 };
           const image = new Image();
           image.src = capture;
@@ -113,23 +126,29 @@ for (const run of runs) {
           context.drawImage(image, 0, 0);
           const pixels = context.getImageData(0, 0, image.width, image.height).data;
           let lit = 0;
+
           for (let i = 0; i < pixels.length; i += 4)
             if (pixels[i]! + pixels[i + 1]! + pixels[i + 2]! > 24) lit++;
+
           return { frames, errors, lit: lit / (pixels.length / 4) };
         }),
       )
       .catch((error: Error) => ({ frames: 0, errors: [error.message], lit: 0 }));
+
     if (demo === "editor" && result.errors.length === 0)
       result.errors.push(...(await useEditor(page)));
+
     if (demo === "postcard" && result.errors.length === 0)
       result.errors.push(...(await usePostcard(page)));
     const ok = result.errors.length === 0 && result.lit > 0.01;
+
     if (!ok) failures++;
     const seconds = ((performance.now() - started) / 1000).toFixed(1);
     console.log(
       `${ok ? "ok  " : "FAIL"} ${demo}${run.label}: ${result.frames} frames, ${(result.lit * 100).toFixed(0)}% lit, ${seconds}s${result.errors.length ? `\n     ${result.errors.join("\n     ")}` : ""}`,
     );
   }
+
   await browser.close();
 }
 
@@ -147,6 +166,7 @@ async function useEditor(page: Page): Promise<string[]> {
       undefined,
       { timeout: 60_000 },
     );
+
     return [];
   } catch (error) {
     return [
@@ -159,6 +179,7 @@ async function useEditor(page: Page): Promise<string[]> {
 async function usePostcard(page: Page): Promise<string[]> {
   try {
     await clickDrawn(page, "input[name=to]");
+
     if (!(await page.evaluate(() => document.activeElement?.getAttribute("name") === "to")))
       throw new Error("a click on the drawn name field missed it");
     await page.keyboard.press("ControlOrMeta+A");
@@ -171,6 +192,7 @@ async function usePostcard(page: Page): Promise<string[]> {
       undefined,
       { timeout: 120_000 },
     );
+
     return [];
   } catch (error) {
     return [
@@ -189,27 +211,36 @@ async function clickDrawn(page: Page, selector: string) {
     const card = document.querySelector<HTMLElement>("#card");
     const control = card?.querySelector<HTMLElement>(selector);
     const placement = window.__interstage?.placement;
+
     if (!card || !control || !placement)
       throw new Error(`${selector} or the card's placement is missing`);
+
     // Layout offsets, which transforms leave alone.
     const offset = (node: HTMLElement) => {
       let x = 0;
       let y = 0;
+
       for (let at: Element | null = node; at instanceof HTMLElement; at = at.offsetParent) {
         x += at.offsetLeft;
         y += at.offsetTop;
       }
+
       return { x, y };
     };
+
     const inCard = {
       x: offset(control).x - offset(card).x + control.offsetWidth / 2,
       y: offset(control).y - offset(card).y + control.offsetHeight / 2,
     };
+
     const drawn = new DOMMatrix(placement).transformPoint(inCard);
+
     return { x: drawn.x, y: drawn.y };
   }, selector);
+
   await page.mouse.click(point.x, point.y);
 }
 
 if (server.listening) server.close();
+
 process.exitCode = failures > 0 ? 1 : 0;

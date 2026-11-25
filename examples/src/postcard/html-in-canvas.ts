@@ -42,13 +42,16 @@ declare global {
 /** Why this browser can't run the page, or undefined when it can. */
 export function unsupported(canvas: HTMLCanvasElement): string | undefined {
   if (!("gpu" in navigator)) return "This browser has no WebGPU.";
+
   if (canvas.requestPaint === undefined) return "This browser can't draw HTML into a canvas yet.";
+
   if (
     !("drawElementImageToTexture" in GPUQueue.prototype) &&
     !("copyElementImageToTexture" in GPUQueue.prototype)
   ) {
     return "This browser draws HTML into 2D canvases, but not into WebGPU textures yet.";
   }
+
   return undefined;
 }
 
@@ -87,6 +90,7 @@ const dialects: Draw[] = [
     queue.copyElementImageToTexture(element, width, height, { texture });
   },
 ];
+
 let dialect: Draw | undefined;
 
 /** Draws the element's latest snapshot into the texture, scaled to `width` × `height` texels. */
@@ -98,15 +102,18 @@ export function drawElement(
   height: number,
 ) {
   if (dialect) return dialect(queue, element, texture, width, height);
+
   for (const each of dialects) {
     try {
       each(queue, element, texture, width, height);
       dialect = each;
+
       return;
     } catch (error) {
       if (!(error instanceof TypeError)) throw error;
     }
   }
+
   throw new Error(
     "This browser can't draw an element into a WebGPU texture in any way this page knows.",
   );
@@ -121,11 +128,13 @@ export function elementPlacer(
   element: HTMLElement,
 ): (transform: DOMMatrix) => void {
   const update = canvas.updateElementGeometry?.bind(canvas);
+
   if (update && followsCanvasTransforms(canvas, element))
     return (transform) => update(element, { canvasTransform: transform });
   // The older model hit-tests the element where its CSS transform puts it, once
   // updateElementGeometry() has made it hit-testable, in the versions that have that.
   element.style.transformOrigin = "0 0";
+
   return (transform) => {
     update?.(element, { canvasTransform: transform });
     element.style.transform = transform.toString();
@@ -142,6 +151,7 @@ export function elementPlacer(
 function followsCanvasTransforms(canvas: HTMLCanvasElement, element: Element) {
   try {
     canvas.getElementTransform?.(element);
+
     return true;
   } catch (error) {
     return !(error instanceof TypeError);

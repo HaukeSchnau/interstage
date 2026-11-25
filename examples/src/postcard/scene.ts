@@ -62,5 +62,6 @@ export interface Effect {
 /** The card where it lies flat, as CSS pixels of the canvas. */
 export function flat(scene: Scene): DOMMatrix {
   const { card, ratio } = scene;
+
   return new DOMMatrix().translate(card.x / ratio, card.y / ratio).scale(card.scale / ratio);
 }

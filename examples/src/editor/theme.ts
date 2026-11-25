@@ -7,6 +7,7 @@ const KEYWORDS = new Set(
     " ",
   ),
 );
+
 const TYPES =
   /^(?:[iuf]32|f16|bool|vec[234][iufh]?|mat[234]x[234][fh]?|array|atomic|ptr|sampler(?:_comparison)?|texture_\w+|function|private|workgroup|uniform|storage|read|write|read_write)$/;
 
@@ -17,28 +18,43 @@ export const wgsl = StreamLanguage.define<{ comment: boolean }>({
   token(stream, state) {
     if (state.comment) {
       state.comment = !stream.match(/^.*?\*\//);
+
       if (state.comment) stream.skipToEnd();
+
       return "comment";
     }
+
     if (stream.eatSpace()) return null;
+
     if (stream.match("//")) {
       stream.skipToEnd();
+
       return "comment";
     }
+
     if (stream.match("/*")) {
       state.comment = true;
+
       return "comment";
     }
+
     if (stream.match(/^@\w+/)) return "meta";
+
     if (stream.match(/^(?:0[xX][\da-fA-F]+|\d+\.?\d*(?:[eE][+-]?\d+)?|\.\d+)[iufh]?/))
       return "number";
+
     if (stream.match(/^[A-Za-z_]\w*/)) {
       const word = stream.current();
+
       if (KEYWORDS.has(word)) return "keyword";
+
       if (TYPES.test(word)) return "typeName";
+
       return stream.peek() === "(" ? "variableName.function" : "variableName";
     }
+
     stream.next();
+
     return null;
   },
   languageData: { commentTokens: { line: "//" } },

@@ -43,13 +43,16 @@ const app = await demo({
 /** Lowland to snow, by height above sea level. */
 const landColor = (height: number): d.v3f => {
   "use gpu";
+
   let color = std.mix(
     d.vec3f(0.78, 0.74, 0.55),
     d.vec3f(0.46, 0.55, 0.36),
     std.smoothstep(0, 0.18, height),
   );
+
   color = std.mix(color, d.vec3f(0.42, 0.37, 0.29), std.smoothstep(0.2, 0.5, height));
   color = std.mix(color, d.vec3f(0.62, 0.6, 0.57), std.smoothstep(0.5, 0.7, height));
+
   return std.mix(color, d.vec3f(0.96, 0.95, 0.93), std.smoothstep(0.8, 0.92, height));
 };
 
@@ -57,6 +60,7 @@ const map = tgpu.fragmentFn({ in: { position: d.builtin.position }, out: d.vec4f
   "use gpu";
   const view = atlas.layout0.$.view;
   const pixel = view.scale / view.resolution.y;
+
   const p = std.add(
     view.center,
     std.mul(std.sub(input.position.xy, std.mul(view.resolution, 0.5)), pixel),
@@ -70,9 +74,11 @@ const map = tgpu.fragmentFn({ in: { position: d.builtin.position }, out: d.vec4f
   const normal = std.normalize(
     d.vec3f(((height - east) / pixel) * 0.3, ((height - south) / pixel) * 0.3, 1),
   );
+
   const light = std.clamp(std.dot(normal, std.normalize(d.vec3f(-1, -1, 1.3))), 0, 1);
 
   let color = d.vec3f();
+
   if (height < 0) {
     const depth = -height;
     color = std.mix(
@@ -90,17 +96,20 @@ const map = tgpu.fragmentFn({ in: { position: d.builtin.position }, out: d.vec4f
     const line = 1 - std.smoothstep(steepness * 0.6, steepness * 1.6, band);
     color = std.mul(color, 1 - 0.35 * line);
   }
+
   const coast = 1 - std.smoothstep(0, 0.006, std.abs(height));
   color = std.mix(color, d.vec3f(0.95, 0.92, 0.82), coast * 0.7);
 
   const edge = std.length(std.sub(std.div(input.position.xy, view.resolution), d.vec2f(0.5)));
   color = std.mul(color, 1 - 0.55 * std.smoothstep(0.35, 0.85, edge));
+
   return d.vec4f(color, 1);
 });
 
 const { root, values, pointer, canvas } = app;
 const view = root.createBuffer(atlas.View).$usage("uniform");
 const bindings = root.createBindGroup(atlas.layout0, { view });
+
 // A WGSL vertex stage and a TypeScript fragment stage in one pipeline.
 const pipeline = root.createRenderPipeline({
   vertex: atlas.fullscreen,
@@ -112,6 +121,7 @@ let seed = 17.3;
 let time = 0;
 const center = { x: 0, y: 0 };
 let wheelZoom = 1;
+
 canvas.addEventListener(
   "wheel",
   (event) => {
@@ -125,6 +135,7 @@ app.run(({ dt }) => {
   time += dt;
   const scale = (4 * wheelZoom) / values.zoom;
   const aspect = canvas.width / canvas.height;
+
   if (pointer.down) {
     center.x -= pointer.dx * aspect * scale;
     center.y -= pointer.dy * scale;
@@ -132,6 +143,7 @@ app.run(({ dt }) => {
     center.x += 0.04 * scale * dt;
     center.y += 0.015 * scale * dt;
   }
+
   view.write({
     center: d.vec2f(center.x, center.y),
     resolution: d.vec2f(canvas.width, canvas.height),

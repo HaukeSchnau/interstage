@@ -23,11 +23,13 @@ const escape = (text: string) => text.replace(/[&<>"]/g, (char) => `&#${char.cha
 export function highlight(code: string, language: "wgsl" | "ts", shared: Set<string>): string {
   let html = "";
   let cursor = 0;
+
   for (const match of code.matchAll(TOKEN)) {
     html += escape(code.slice(cursor, match.index));
     cursor = match.index + match[0].length;
     const [text, comment, string, attribute, number, word] = match;
     const span = (kind: string) => `<span class="${kind}">${escape(text)}</span>`;
+
     if (comment) html += span("c");
     else if (string) html += span("s");
     else if (attribute) html += span("k");
@@ -37,5 +39,6 @@ export function highlight(code: string, language: "wgsl" | "ts", shared: Set<str
     else if (word)
       html += `<span class="id" data-name="${word}"${shared.has(word) ? " data-shared" : ""}>${word}</span>`;
   }
+
   return html + escape(code.slice(cursor));
 }

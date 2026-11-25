@@ -60,6 +60,7 @@ const app = await demo({
 
 const { values, pointer, canvas } = app;
 const simulation = slimeSimulation(app.root, app.format);
+
 const size = () => ({
   scale:
     quality === "low" ? 0.25 : Math.min(1, 1600 / canvas.width) * (canvas.width > 1200 ? 0.75 : 1),
@@ -67,16 +68,19 @@ const size = () => ({
 });
 
 let species = values.speciesCount;
+
 function reset() {
   species = values.speciesCount;
   simulation.reset(d.vec2f(canvas.width, canvas.height), size(), values);
 }
 
 let resizeTimer: ReturnType<typeof setTimeout> | undefined;
+
 app.onResize(() => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(reset, 200);
 });
+
 reset();
 
 app.run(({ dt }) => {

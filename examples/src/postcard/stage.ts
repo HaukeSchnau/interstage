@@ -6,11 +6,13 @@ import * as stage from "./stage.wgsl";
 export function createStage(scene: Scene) {
   const { root } = scene;
   const params = root.createBuffer(stage.Stage).$usage("uniform");
+
   const group = root.createBindGroup(stage.layout0, {
     stage: params,
     page: scene.page,
     pageSampler: scene.sampler,
   });
+
   const pipeline = root.createRenderPipeline({
     vertex: stage.fullscreen,
     fragment: stage.backdrop,

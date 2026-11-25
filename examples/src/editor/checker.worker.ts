@@ -48,12 +48,15 @@ const options: ts.CompilerOptions = {
 
 const edited = new Map<string, { text: string; version: number }>();
 const read = (path: string) => edited.get(path)?.text ?? files[path];
+
 const write = (path: string, text: string) => {
   const previous = edited.get(path);
+
   if (previous?.text !== text) edited.set(path, { text, version: (previous?.version ?? 0) + 1 });
 };
 
 const directories = new Set(["/"]);
+
 for (const path of Object.keys(files)) {
   for (
     let directory = path.slice(0, path.lastIndexOf("/"));
@@ -70,6 +73,7 @@ const service = ts.createLanguageService({
   getScriptVersion: (path) => String(edited.get(path)?.version ?? 0),
   getScriptSnapshot: (path) => {
     const text = read(path);
+
     return text === undefined ? undefined : ts.ScriptSnapshot.fromString(text);
   },
   getCurrentDirectory: () => "/",
@@ -85,23 +89,28 @@ const api = {
     write(MAIN, main);
     write(SHADER, shader);
     const started = performance.now();
+
     const diagnostics = [
       ...service.getSyntacticDiagnostics(MAIN),
       ...service.getSemanticDiagnostics(MAIN),
     ];
+
     const problems = diagnostics.map((diagnostic): Problem => ({
       from: diagnostic.start ?? 0,
       to: (diagnostic.start ?? 0) + (diagnostic.length ?? 0),
       message: ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n"),
       code: `TS${diagnostic.code}`,
     }));
+
     return { problems, milliseconds: performance.now() - started };
   },
 
   hover(main: string, position: number): Hover | undefined {
     write(MAIN, main);
     const info = service.getQuickInfoAtPosition(MAIN, position);
+
     if (!info) return undefined;
+
     return {
       from: info.textSpan.start,
       to: info.textSpan.start + info.textSpan.length,
@@ -113,6 +122,7 @@ const api = {
   complete(main: string, position: number): Completion[] {
     write(MAIN, main);
     const info = service.getCompletionsAtPosition(MAIN, position, undefined);
+
     return (info?.entries ?? [])
       .toSorted((a, b) => a.sortText.localeCompare(b.sortText))
       .slice(0, 300)
@@ -126,9 +136,12 @@ const api = {
   definition(main: string, position: number): Definition | undefined {
     write(MAIN, main);
     const [first] = service.getDefinitionAtPosition(MAIN, position) ?? [];
+
     if (!first) return undefined;
+
     const file =
       first.fileName === SHADER ? "shader" : first.fileName === MAIN ? "main" : "library";
+
     return { file, from: first.textSpan.start, to: first.textSpan.start + first.textSpan.length };
   },
 
@@ -140,6 +153,7 @@ const api = {
 };
 
 export type CheckerApi = typeof api;
+
 export type Call = {
   [Method in keyof CheckerApi]: {
     id: number;
@@ -147,6 +161,7 @@ export type Call = {
     args: Parameters<CheckerApi[Method]>;
   };
 }[keyof CheckerApi];
+
 export type Reply =
   | { ready: string }
   | { id: number; result: unknown }
@@ -172,4 +187,5 @@ addEventListener("message", ({ data }: MessageEvent<Call>) => {
     } satisfies Reply);
   }
 });
+
 postMessage({ ready: ts.version } satisfies Reply);

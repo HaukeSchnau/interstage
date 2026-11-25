@@ -4,6 +4,7 @@ import { context, format, onFrame, pointer, root } from "./page";
 
 const lamp = root.createBuffer(Lamp).$usage("uniform");
 const group = root.createBindGroup(layout0, { lamp });
+
 const pipeline = root.createRenderPipeline({
   vertex: fullscreen,
   fragment: glow,

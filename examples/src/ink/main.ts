@@ -58,6 +58,7 @@ const app = await demo({
 const { root, values, pointer } = app;
 const params = root.createBuffer(ink.Params).$usage("uniform");
 const shared = root.createBindGroup(ink.layout0, { params });
+
 const passes = {
   curl: root.createComputePipeline({ compute: ink.computeCurl }),
   vorticity: root.createComputePipeline({ compute: ink.confineVorticity }),
@@ -68,6 +69,7 @@ const passes = {
   relax: root.createComputePipeline({ compute: ink.relaxPressure }),
   project: root.createComputePipeline({ compute: ink.project }),
 };
+
 const render = root.createRenderPipeline({
   vertex: ink.fullscreen,
   fragment: ink.render,
@@ -88,13 +90,16 @@ function createWorld() {
   const pressure = [scalars(), scalars()] as const;
   const divergence = scalars();
   const curl = scalars();
+
   /** Which buffer of each pair is the input. */
   const current: Record<"velocity" | "dye" | "pressure", 0 | 1> = {
     velocity: 0,
     dye: 0,
     pressure: 0,
   };
+
   const groups = new Map<string, ReturnType<typeof bind>>();
+
   const bind = (v: 0 | 1, c: 0 | 1, p: 0 | 1) =>
     root.createBindGroup(ink.layout1, {
       velocityIn: velocity[v],
@@ -106,11 +111,15 @@ function createWorld() {
       divergence,
       curl,
     });
+
   const group = () => {
     const key = `${current.velocity}${current.dye}${current.pressure}`;
+
     if (!groups.has(key)) groups.set(key, bind(current.velocity, current.dye, current.pressure));
+
     return groups.get(key)!;
   };
+
   return {
     size: d.vec2f(columns, rows),
     current,
@@ -120,12 +129,14 @@ function createWorld() {
 }
 
 let world = createWorld();
+
 app.onResize(() => {
   for (const buffer of world.buffers) buffer.destroy();
   world = createWorld();
 });
 
 let hue = Math.random();
+
 // Start as if the pointer had been idle, so that the first strokes come right away.
 let idle = 1.5;
 let nextStroke = 0;
@@ -139,6 +150,7 @@ interface Stroke {
   remaining: number;
   color: d.v3f;
 }
+
 let strokes: Stroke[] = [];
 
 interface Splat {
@@ -167,6 +179,7 @@ function writeParams(dt: number, splat: Splat) {
 function color(): d.v3f {
   hue = (hue + 0.61803) % 1;
   const channel = (offset: number) => 0.5 + 0.5 * Math.cos(2 * Math.PI * (hue + offset));
+
   return d.vec3f(channel(0) * 4, channel(0.33) * 4, channel(0.67) * 4);
 }
 
@@ -175,6 +188,7 @@ app.run(({ dt }) => {
     Math.ceil(world.size.x / ink.WORKGROUP),
     Math.ceil(world.size.y / ink.WORKGROUP),
   ] as const;
+
   const run = (
     pass: (typeof passes)[keyof typeof passes],
     swap: Array<keyof typeof world.current>,
@@ -183,12 +197,14 @@ app.run(({ dt }) => {
       .with(shared)
       .with(world.group())
       .dispatchWorkgroups(...tiles);
+
     for (const field of swap) world.current[field] = flip(world.current[field]);
   };
 
   let splat: Splat | undefined;
   const moving = pointer.down && Math.hypot(pointer.dx, pointer.dy) > 0;
   idle = moving ? 0 : idle + dt;
+
   if (moving) {
     splat = {
       at: d.vec2f(pointer.x * world.size.x, pointer.y * world.size.y),
@@ -211,7 +227,9 @@ app.run(({ dt }) => {
         color: color(),
       });
     }
+
     const stroke = strokes[0];
+
     if (stroke) {
       const speed = 0.45;
       stroke.angle += stroke.turn * dt;
@@ -228,17 +246,21 @@ app.run(({ dt }) => {
         color: d.vec3f(stroke.color.x * 0.22, stroke.color.y * 0.22, stroke.color.z * 0.22),
         size: 1.4,
       };
+
       if (stroke.remaining <= 0) strokes = strokes.slice(1);
     }
   }
+
   writeParams(dt, splat ?? { at: d.vec2f(-1e4), force: d.vec2f(), color: d.vec3f(), size: 1 });
 
   run(passes.curl, []);
   run(passes.vorticity, ["velocity"]);
+
   if (splat) run(passes.splat, ["velocity", "dye"]);
   run(passes.advectVelocity, ["velocity"]);
   run(passes.advectDye, ["dye"]);
   run(passes.divergence, ["pressure"]);
+
   for (let i = 0; i < values.iterations; i++) run(passes.relax, ["pressure"]);
   run(passes.project, ["velocity"]);
 

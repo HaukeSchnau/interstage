@@ -34,6 +34,7 @@ const app = await demo({
 const { root, values, pointer } = app;
 const scene = root.createBuffer(sculpture.Scene).$usage("uniform");
 const bindings = root.createBindGroup(sculpture.layout0, { scene });
+
 const pipeline = root.createRenderPipeline({
   vertex: sculpture.fullscreen,
   fragment: sculpture.shade,
@@ -45,6 +46,7 @@ let time = 0;
 
 app.run(({ dt }) => {
   time += dt;
+
   if (pointer.down) {
     camera.yaw -= pointer.dx * 5;
     camera.pitch = Math.min(1.2, Math.max(-0.1, camera.pitch + pointer.dy * 3));

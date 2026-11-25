@@ -22,6 +22,7 @@ runContentMapper<Options, Project>({
         messageText: `Unknown option '${key}'`,
         code: DiagnosticCode.Option,
       }));
+
     if (options.validate !== undefined && typeof options.validate !== "boolean") {
       optionDiagnostics.push({
         path: ["validate"],
@@ -29,7 +30,9 @@ runContentMapper<Options, Project>({
         code: DiagnosticCode.Option,
       });
     }
+
     if (options.validate !== true) return { project: { validator: undefined }, optionDiagnostics };
+
     try {
       return { project: { validator: await createValidator() }, optionDiagnostics };
     } catch (error) {
@@ -38,6 +41,7 @@ runContentMapper<Options, Project>({
         messageText: (error as Error).message,
         code: DiagnosticCode.Option,
       });
+
       return { project: { validator: undefined }, optionDiagnostics };
     }
   },
@@ -47,6 +51,7 @@ runContentMapper<Options, Project>({
       navigation: true,
       positionEncoding,
     });
+
     // Tint reports syntax errors too; one report of each is enough.
     if (
       project.validator &&
@@ -54,7 +59,9 @@ runContentMapper<Options, Project>({
     ) {
       diagnostics.push(...(await project.validator(content)));
     }
+
     const position = (index: number) => stringIndexToPosition(content, index, positionEncoding);
+
     return {
       text: code,
       extension: ".mts",
